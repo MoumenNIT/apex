@@ -706,52 +706,60 @@ function ProductsPage({ navigate, addToast }) {
   return (
     <div className="page">
       <div className="container" style={{ paddingTop: 48 }}>
-        <div className="section-header">
-          <div className="section-eyebrow">// Our Catalogue</div>
-          <h1 className="section-title">ALL BUILDS</h1>
-          <p className="section-sub">Every machine is hand-assembled, stress-tested and shipped ready to run.</p>
-        </div>
-        <div className="filters">
-          <div className="filter-group">
-            <label className="filter-label">Search</label>
-            <input className="filter-search" placeholder="Search products..." value={search} onChange={e => setSearch(e.target.value)} />
+        <FadeContent>
+          <div className="section-header">
+            <div className="section-eyebrow">// Our Catalogue</div>
+            <h1 className="section-title">ALL BUILDS</h1>
+            <p className="section-sub">Every machine is hand-assembled, stress-tested and shipped ready to run.</p>
           </div>
-          <div className="filter-group">
-            <label className="filter-label">Category</label>
-            <select className="filter-select" value={category} onChange={e => setCategory(e.target.value)}>
-              {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-            </select>
+        </FadeContent>
+        <FadeContent delay={200}>
+          <div className="filters">
+            <div className="filter-group">
+              <label className="filter-label">Search</label>
+              <input className="filter-search" placeholder="Search products..." value={search} onChange={e => setSearch(e.target.value)} />
+            </div>
+            <div className="filter-group">
+              <label className="filter-label">Category</label>
+              <select className="filter-select" value={category} onChange={e => setCategory(e.target.value)}>
+                {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+              </select>
+            </div>
+            <div className="filter-group">
+              <label className="filter-label">Brand</label>
+              <select className="filter-select" value={brand} onChange={e => setBrand(e.target.value)}>
+                {BRANDS.map(b => <option key={b}>{b}</option>)}
+              </select>
+            </div>
+            <div className="filter-group">
+              <label className="filter-label">Sort By</label>
+              <select className="filter-select" value={sort} onChange={e => setSort(e.target.value)}>
+                <option value="featured">Featured</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="rating">Top Rated</option>
+              </select>
+            </div>
+            <span className="results-count">{filtered.length} product{filtered.length !== 1 ? "s" : ""}</span>
           </div>
-          <div className="filter-group">
-            <label className="filter-label">Brand</label>
-            <select className="filter-select" value={brand} onChange={e => setBrand(e.target.value)}>
-              {BRANDS.map(b => <option key={b}>{b}</option>)}
-            </select>
-          </div>
-          <div className="filter-group">
-            <label className="filter-label">Sort By</label>
-            <select className="filter-select" value={sort} onChange={e => setSort(e.target.value)}>
-              <option value="featured">Featured</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-              <option value="rating">Top Rated</option>
-            </select>
-          </div>
-          <span className="results-count">{filtered.length} product{filtered.length !== 1 ? "s" : ""}</span>
-        </div>
+        </FadeContent>
 
         {filtered.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "60px 0", color: "var(--muted)" }}>
-            <div style={{ fontSize: 60, marginBottom: 16 }}>🔍</div>
-            <div style={{ fontSize: 18 }}>No products match your filters.</div>
-            <button className="btn btn-ghost" style={{ marginTop: 16 }} onClick={() => { setSearch(""); setCategory("All"); setBrand("All"); }}>
-              Clear Filters
-            </button>
-          </div>
+          <FadeContent delay={400}>
+            <div style={{ textAlign: "center", padding: "60px 0", color: "var(--muted)" }}>
+              <div style={{ fontSize: 60, marginBottom: 16 }}>🔍</div>
+              <div style={{ fontSize: 18 }}>No products match your filters.</div>
+              <ShinyButton style={{ marginTop: 16 }} onClick={() => { setSearch(""); setCategory("All"); setBrand("All"); }}>
+                Clear Filters
+              </ShinyButton>
+            </div>
+          </FadeContent>
         ) : (
-          <div className="products-grid">
-            {filtered.map(p => <ProductCard key={p.id} product={p} navigate={navigate} addToast={addToast} />)}
-          </div>
+          <FadeContent delay={400}>
+            <div className="products-grid">
+              {filtered.map(p => <ProductCard key={p.id} product={p} navigate={navigate} addToast={addToast} />)}
+            </div>
+          </FadeContent>
         )}
       </div>
     </div>
@@ -765,11 +773,13 @@ function ProductDetailPage({ slug, navigate, addToast }) {
 
   if (!product) {
     return (
-      <div className="page" style={{ textAlign: "center", paddingTop: 80 }}>
-        <div style={{ fontSize: 60 }}>404</div>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 40, marginTop: 16 }}>PRODUCT NOT FOUND</h2>
-        <button className="btn btn-primary" style={{ marginTop: 24 }} onClick={() => navigate("#/products")}>Back to Products</button>
-      </div>
+      <FadeContent>
+        <div className="page" style={{ textAlign: "center", paddingTop: 80 }}>
+          <div style={{ fontSize: 60 }}>404</div>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 40, marginTop: 16 }}>PRODUCT NOT FOUND</h2>
+          <ShinyButton style={{ marginTop: 24 }} onClick={() => navigate("#/products")}>Back to Products</ShinyButton>
+        </div>
+      </FadeContent>
     );
   }
 
@@ -783,68 +793,77 @@ function ProductDetailPage({ slug, navigate, addToast }) {
   return (
     <div className="page">
       <div className="container">
-        <div className="breadcrumb">
-          <button className="bc-btn" onClick={() => navigate("#/")}>Home</button>
-          <span className="bc-sep">›</span>
-          <button className="bc-btn" onClick={() => navigate("#/products")}>Products</button>
-          <span className="bc-sep">›</span>
-          <span style={{ color: "var(--text)" }}>{product.name}</span>
-        </div>
+        <FadeContent>
+          <div className="breadcrumb">
+            <button className="bc-btn" onClick={() => navigate("#/")}>Home</button>
+            <span className="bc-sep">›</span>
+            <button className="bc-btn" onClick={() => navigate("#/products")}>Products</button>
+            <span className="bc-sep">›</span>
+            <span style={{ color: "var(--text)" }}>{product.name}</span>
+          </div>
+        </FadeContent>
         <div className="detail-grid">
-          <div className="detail-visual" style={{ background: `${product.color}10` }}>
-            <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 12, letterSpacing: 3, textTransform: "uppercase", color: "var(--muted)", fontFamily: "var(--font-mono)" }}>
-                {product.category} · {product.brand}
+          <FadeContent delay={200}>
+            <TiltCard>
+              <AnimatedCard hoverScale={1.02} style={{ background: `${product.color}10`, borderRadius: '20px', padding: '60px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'sticky', top: 96, gap: '24px' }}>
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: 12, letterSpacing: 3, textTransform: "uppercase", color: "#666", fontFamily: "var(--font-mono)" }}>
+                    {product.category} · {product.brand}
+                  </div>
+                  {product.badge && <span className="product-badge" style={{ position: "static", display: "inline-block", marginTop: 8 }}>{product.badge}</span>}
+                  <div style={{ fontSize: '120px', fontWeight: 'bold', color: product.color, marginTop: '20px' }}>{product.name.charAt(0)}</div>
+                </div>
+              </AnimatedCard>
+            </TiltCard>
+          </FadeContent>
+          <FadeContent delay={400}>
+            <div>
+              <h1 className="detail-name">{product.name}</h1>
+              <p className="detail-tagline">{product.tagline}</p>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "16px 0" }}>
+                <Stars rating={product.rating} />
+                <span style={{ fontWeight: 600, fontSize: 16 }}>{product.rating}</span>
+                <span style={{ color: "var(--muted)", fontSize: 14 }}>({product.reviews} reviews)</span>
               </div>
-              {product.badge && <span className="product-badge" style={{ position: "static", display: "inline-block", marginTop: 8 }}>{product.badge}</span>}
-            </div>
-          </div>
-          <div>
-            <h1 className="detail-name">{product.name}</h1>
-            <p className="detail-tagline">{product.tagline}</p>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "16px 0" }}>
-              <Stars rating={product.rating} />
-              <span style={{ fontWeight: 600, fontSize: 16 }}>{product.rating}</span>
-              <span style={{ color: "var(--muted)", fontSize: 14 }}>({product.reviews} reviews)</span>
-            </div>
-            <div className="detail-price-row">
-              <span className="detail-price">${product.price.toLocaleString()}</span>
-              {product.originalPrice && <>
-                <span className="detail-orig">${product.originalPrice.toLocaleString()}</span>
-                <span className="detail-savings">Save ${savings.toLocaleString()}</span>
-              </>}
-            </div>
-            <hr className="divider" style={{ margin: "24px 0" }} />
-            <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "var(--muted)", marginBottom: 12 }}>Highlights</div>
-              <ul className="highlights-list">
-                {product.highlights.map(h => <li key={h}>{h}</li>)}
-              </ul>
-            </div>
-            <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "var(--muted)", marginBottom: 12 }}>Full Specifications</div>
-              <table className="specs-table">
-                <tbody>
-                  {Object.entries(product.specs).map(([k, v]) => (
-                    <tr key={k}><td>{k.toUpperCase()}</td><td>{v}</td></tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="add-cart-row">
-              <div className="qty-control">
-                <button className="qty-btn" onClick={() => setQty(q => Math.max(1, q - 1))}>−</button>
-                <div className="qty-val">{qty}</div>
-                <button className="qty-btn" onClick={() => setQty(q => q + 1)}>+</button>
+              <div className="detail-price-row">
+                <span className="detail-price">$<CountUp end={product.price} /></span>
+                {product.originalPrice && <>
+                  <span className="detail-orig">${product.originalPrice.toLocaleString()}</span>
+                  <span className="detail-savings">Save ${savings.toLocaleString()}</span>
+                </>}
               </div>
-              <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleAdd}>
-                Add to Cart — ${(product.price * qty).toLocaleString()}
-              </button>
+              <hr className="divider" style={{ margin: "24px 0" }} />
+              <div style={{ marginBottom: 28 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "var(--muted)", marginBottom: 12 }}>Highlights</div>
+                <ul className="highlights-list">
+                  {product.highlights.map(h => <li key={h}>{h}</li>)}
+                </ul>
+              </div>
+              <div style={{ marginBottom: 28 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "var(--muted)", marginBottom: 12 }}>Full Specifications</div>
+                <table className="specs-table">
+                  <tbody>
+                    {Object.entries(product.specs).map(([k, v]) => (
+                      <tr key={k}><td>{k.toUpperCase()}</td><td>{v}</td></tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="add-cart-row">
+                <div className="qty-control">
+                  <button className="qty-btn" onClick={() => setQty(q => Math.max(1, q - 1))}>−</button>
+                  <div className="qty-val">{qty}</div>
+                  <button className="qty-btn" onClick={() => setQty(q => q + 1)}>+</button>
+                </div>
+                <ShinyButton style={{ flex: 1 }} onClick={handleAdd}>
+                  Add to Cart — ${(product.price * qty).toLocaleString()}
+                </ShinyButton>
+              </div>
+              <ShinyButton style={{ marginTop: 12, background: 'transparent', border: '1px solid #333' }} onClick={() => { handleAdd(); navigate("#/cart"); }}>
+                Buy Now
+              </ShinyButton>
             </div>
-            <button className="btn btn-outline btn-block" style={{ marginTop: 12 }} onClick={() => { handleAdd(); navigate("#/cart"); }}>
-              Buy Now
-            </button>
-          </div>
+          </FadeContent>
         </div>
       </div>
     </div>
