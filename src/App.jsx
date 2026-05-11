@@ -877,57 +877,67 @@ function CartPage({ navigate }) {
 
   if (items.length === 0) {
     return (
-      <div className="page">
-        <div className="container empty-cart">
-          <div className="empty-cart-icon">🛒</div>
-          <h2>YOUR CART IS EMPTY</h2>
-          <p>You have not added any machines yet.</p>
-          <button className="btn btn-primary" onClick={() => navigate("#/products")}>Browse Products</button>
+      <FadeContent>
+        <div className="page">
+          <div className="container empty-cart">
+            <div className="empty-cart-icon">🛒</div>
+            <h2>YOUR CART IS EMPTY</h2>
+            <p>You have not added any machines yet.</p>
+            <ShinyButton onClick={() => navigate("#/products")}>Browse Products</ShinyButton>
+          </div>
         </div>
-      </div>
+      </FadeContent>
     );
   }
 
   return (
     <div className="page">
       <div className="container">
-        <div style={{ padding: "40px 0 0" }}>
-          <div className="section-eyebrow">// Your Selection</div>
-          <h1 className="section-title">SHOPPING CART</h1>
-        </div>
+        <FadeContent>
+          <div style={{ padding: "40px 0 0" }}>
+            <div className="section-eyebrow">// Your Selection</div>
+            <h1 className="section-title">SHOPPING CART</h1>
+          </div>
+        </FadeContent>
         <div className="cart-layout">
-          <div className="cart-items">
-            {items.map(item => (
-              <div key={item.id} className="cart-item">
-                <div style={{ flex: 1 }}>
-                  <div className="cart-item-name">{item.name}</div>
-                  <div className="cart-item-cat">{item.category} · {item.brand}</div>
-                  <div style={{ fontSize: 13, color: "var(--muted)", marginTop: 4 }}>{item.specs.cpu} / {item.specs.gpu}</div>
-                </div>
-                <div className="qty-control" style={{ margin: "0 16px" }}>
-                  <button className="qty-btn" onClick={() => dispatch({ type: "SET_QTY", id: item.id, qty: item.qty - 1 })}>−</button>
-                  <div className="qty-val">{item.qty}</div>
-                  <button className="qty-btn" onClick={() => dispatch({ type: "SET_QTY", id: item.id, qty: item.qty + 1 })}>+</button>
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  <div className="cart-item-price">${(item.price * item.qty).toLocaleString()}</div>
-                  <div style={{ fontSize: 13, color: "var(--muted)" }}>${item.price.toLocaleString()} each</div>
-                  <button className="btn btn-ghost btn-sm" style={{ color: "var(--accent)", marginTop: 8 }} onClick={() => dispatch({ type: "REMOVE", id: item.id })}>Remove</button>
-                </div>
-              </div>
-            ))}
-            <button className="btn btn-ghost" onClick={() => navigate("#/products")}>← Continue Shopping</button>
-          </div>
-          <div className="cart-summary">
-            <div className="summary-title">ORDER SUMMARY</div>
-            <div className="summary-row"><span>Subtotal ({items.reduce((s, i) => s + i.qty, 0)} items)</span><span>${total.toLocaleString()}</span></div>
-            <div className="summary-row"><span>Shipping</span><span>{shipping === 0 ? <span style={{ color: "#27ae60" }}>FREE</span> : `$${shipping}`}</span></div>
-            <div className="summary-row"><span>Tax (8%)</span><span>${tax.toLocaleString()}</span></div>
-            {total < 2000 && <div style={{ fontSize: 12, color: "var(--muted)", margin: "8px 0" }}>🎁 Spend ${(2000 - total).toLocaleString()} more for free shipping!</div>}
-            <div className="summary-row total"><span>Total</span><span>${(total + shipping + tax).toLocaleString()}</span></div>
-            <button className="btn btn-primary btn-block" style={{ marginTop: 20 }} onClick={() => navigate("#/checkout")}>Proceed to Checkout →</button>
-            <div style={{ textAlign: "center", marginTop: 16, fontSize: 12, color: "var(--muted)" }}>🔒 Secure checkout · SSL encrypted</div>
-          </div>
+          <FadeContent delay={200}>
+            <div className="cart-items">
+              {items.map((item, index) => (
+                <AnimatedCard key={item.id} hoverScale={1.01} style={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: '12px', padding: '20px', marginBottom: '15px' }}>
+                  <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                    <div style={{ flex: 1 }}>
+                      <div className="cart-item-name">{item.name}</div>
+                      <div className="cart-item-cat">{item.category} · {item.brand}</div>
+                      <div style={{ fontSize: 13, color: "#666", marginTop: 4 }}>{item.specs.cpu} / {item.specs.gpu}</div>
+                    </div>
+                    <div className="qty-control" style={{ margin: "0 16px" }}>
+                      <button className="qty-btn" onClick={() => dispatch({ type: "SET_QTY", id: item.id, qty: item.qty - 1 })}>−</button>
+                      <div className="qty-val">{item.qty}</div>
+                      <button className="qty-btn" onClick={() => dispatch({ type: "SET_QTY", id: item.id, qty: item.qty + 1 })}>+</button>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <div className="cart-item-price">$<CountUp end={item.price * item.qty} /></div>
+                      <div style={{ fontSize: 13, color: "#666" }}>${item.price.toLocaleString()} each</div>
+                      <button className="btn btn-ghost btn-sm" style={{ color: "#e63946", marginTop: 8 }} onClick={() => dispatch({ type: "REMOVE", id: item.id })}>Remove</button>
+                    </div>
+                  </div>
+                </AnimatedCard>
+              ))}
+              <ShinyButton style={{ background: 'transparent', border: '1px solid #333' }} onClick={() => navigate("#/products")}>← Continue Shopping</ShinyButton>
+            </div>
+          </FadeContent>
+          <FadeContent delay={400}>
+            <AnimatedCard style={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: '12px', padding: '30px' }}>
+              <div className="summary-title">ORDER SUMMARY</div>
+              <div className="summary-row"><span>Subtotal ({items.reduce((s, i) => s + i.qty, 0)} items)</span><span>$<CountUp end={total} /></span></div>
+              <div className="summary-row"><span>Shipping</span><span>{shipping === 0 ? <span style={{ color: "#27ae60" }}>FREE</span> : `$${shipping}`}</span></div>
+              <div className="summary-row"><span>Tax (8%)</span><span>$<CountUp end={tax} /></span></div>
+              {total < 2000 && <div style={{ fontSize: 12, color: "#666", margin: "8px 0" }}>Spend ${(2000 - total).toLocaleString()} more for free shipping!</div>}
+              <div className="summary-row total"><span>Total</span><span>$<CountUp end={total + shipping + tax} /></span></div>
+              <ShinyButton style={{ marginTop: 20, width: '100%' }} onClick={() => navigate("#/checkout")}>Proceed to Checkout →</ShinyButton>
+              <div style={{ textAlign: "center", marginTop: 16, fontSize: 12, color: "#666" }}>Secure checkout · SSL encrypted</div>
+            </AnimatedCard>
+          </FadeContent>
         </div>
       </div>
     </div>
@@ -956,107 +966,119 @@ function CheckoutPage({ navigate }) {
 
   if (items.length === 0 && step !== 3) {
     return (
-      <div className="page" style={{ textAlign: "center", paddingTop: 80 }}>
-        <div style={{ fontSize: 60 }}>🛒</div>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: 40, marginTop: 16 }}>NOTHING TO CHECK OUT</h2>
-        <button className="btn btn-primary" style={{ marginTop: 24 }} onClick={() => navigate("#/products")}>Browse Products</button>
-      </div>
+      <FadeContent>
+        <div className="page" style={{ textAlign: "center", paddingTop: 80 }}>
+          <div style={{ fontSize: 60 }}>🛒</div>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 40, marginTop: 16 }}>NOTHING TO CHECK OUT</h2>
+          <ShinyButton style={{ marginTop: 24 }} onClick={() => navigate("#/products")}>Browse Products</ShinyButton>
+        </div>
+      </FadeContent>
     );
   }
 
   if (step === 3) {
     return (
-      <div className="page">
-        <div className="container success-screen">
-          <div style={{ fontSize: 80, marginBottom: 24 }}>✅</div>
-          <div className="success-title">ORDER PLACED!</div>
-          <p style={{ fontSize: 18, color: "var(--muted)", marginBottom: 28 }}>Your beast is being hand-assembled right now. Delivery in 2–4 business days.</p>
-          <div className="order-num">{orderNum}</div>
-          <p style={{ color: "var(--muted)", marginBottom: 32 }}>A confirmation has been sent to {form.email || "your email"}.</p>
-          <div style={{ display: "flex", gap: 14, justifyContent: "center" }}>
-            <button className="btn btn-primary" onClick={() => { dispatch({ type: "CLEAR" }); navigate("#/"); }}>Back to Home</button>
-            <button className="btn btn-outline" onClick={() => navigate("#/products")}>Shop More</button>
+      <FadeContent>
+        <div className="page">
+          <div className="container success-screen">
+            <AnimatedCard hoverScale={1.05} style={{ background: '#1a1a2e', border: '1px solid #27ae60', borderRadius: '20px', padding: '60px', textAlign: 'center' }}>
+              <div style={{ fontSize: 80, marginBottom: 24 }}>✅</div>
+              <div className="success-title">ORDER PLACED!</div>
+              <p style={{ fontSize: 18, color: "#666", marginBottom: 28 }}>Your beast is being hand-assembled right now. Delivery in 2–4 business days.</p>
+              <div className="order-num">{orderNum}</div>
+              <p style={{ color: "#666", marginBottom: 32 }}>A confirmation has been sent to {form.email || "your email"}.</p>
+              <div style={{ display: "flex", gap: 14, justifyContent: "center" }}>
+                <ShinyButton onClick={() => { dispatch({ type: "CLEAR" }); navigate("#/"); }}>Back to Home</ShinyButton>
+                <ShinyButton style={{ background: 'transparent', border: '1px solid #333' }} onClick={() => navigate("#/products")}>Shop More</ShinyButton>
+              </div>
+            </AnimatedCard>
           </div>
         </div>
-      </div>
+      </FadeContent>
     );
   }
 
   return (
     <div className="page">
       <div className="container">
-        <div style={{ padding: "40px 0 0" }}>
-          <div className="section-eyebrow">// Secure Checkout</div>
-          <h1 className="section-title">CHECKOUT</h1>
-          <div className="steps">
-            {["Shipping", "Payment"].map((s, i) => (
-              <div key={s} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <div className="step-dot" style={{ background: step > i+1 ? "#27ae60" : step === i+1 ? "var(--accent)" : "var(--bg3)", border: `1px solid ${step >= i+1 ? "transparent" : "var(--border)"}`, color: step >= i+1 ? "white" : "var(--muted)" }}>
-                  {step > i+1 ? "✓" : i+1}
+        <FadeContent>
+          <div style={{ padding: "40px 0 0" }}>
+            <div className="section-eyebrow">// Secure Checkout</div>
+            <h1 className="section-title">CHECKOUT</h1>
+            <div className="steps">
+              {["Shipping", "Payment"].map((s, i) => (
+                <div key={s} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div className="step-dot" style={{ background: step > i+1 ? "#27ae60" : step === i+1 ? "#e63946" : "#333", border: `1px solid ${step >= i+1 ? "transparent" : "#333"}`, color: step >= i+1 ? "white" : "#666" }}>
+                    {step > i+1 ? "✓" : i+1}
+                  </div>
+                  <span style={{ fontSize: 14, color: step === i+1 ? "#fff" : "#666" }}>{s}</span>
+                  {i < 1 && <span style={{ color: "#333", margin: "0 4px" }}>›</span>}
                 </div>
-                <span style={{ fontSize: 14, color: step === i+1 ? "var(--text)" : "var(--muted)" }}>{s}</span>
-                {i < 1 && <span style={{ color: "var(--border2)", margin: "0 4px" }}>›</span>}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        </FadeContent>
         <div className="checkout-layout">
-          <div>
-            {step === 1 && (
-              <div className="form-card">
-                <div className="form-card-title">SHIPPING INFO</div>
-                <div className="form-grid">
-                  <Field label="First Name" id="firstName" placeholder="John" />
-                  <Field label="Last Name"  id="lastName"  placeholder="Doe" />
-                  <Field label="Email"  id="email"  placeholder="john@example.com" type="email" />
-                  <Field label="Phone"  id="phone"  placeholder="+1 (555) 000-0000" />
-                  <Field label="Address" id="address" placeholder="123 Main Street" span />
-                  <Field label="City"  id="city"  placeholder="New York" />
-                  <Field label="State" id="state" placeholder="NY" />
-                  <Field label="ZIP Code" id="zip" placeholder="10001" />
-                </div>
-                <button className="btn btn-primary" style={{ marginTop: 24 }} onClick={() => setStep(2)}>Continue to Payment →</button>
-              </div>
-            )}
-            {step === 2 && (
-              <div className="form-card">
-                <div className="form-card-title">PAYMENT</div>
-                <div className="payment-icons">
-                  {["VISA", "MC", "AMEX", "PayPal"].map(c => <span key={c} className="payment-icon">{c}</span>)}
-                </div>
-                <div style={{ background:"rgba(255,214,10,.08)", border:"1px solid rgba(255,214,10,.2)", borderRadius:"var(--radius)", padding:"10px 14px", fontSize:13, color:"var(--muted)", marginBottom:20 }}>
-                  🔒 Mock checkout — no real payment will be processed.
-                </div>
-                <div className="form-grid">
-                  <Field label="Cardholder Name" id="cardName" placeholder="John Doe" span />
-                  <Field label="Card Number" id="cardNum" placeholder="4242 4242 4242 4242" span />
-                  <Field label="Expiry (MM/YY)" id="expiry" placeholder="12/27" />
-                  <Field label="CVV" id="cvv" placeholder="123" />
+          <FadeContent delay={200}>
+            <div>
+              {step === 1 && (
+                <AnimatedCard hoverScale={1.01} style={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: '16px', padding: '30px' }}>
+                  <div className="form-card-title">SHIPPING INFO</div>
+                  <div className="form-grid">
+                    <Field label="First Name" id="firstName" placeholder="John" />
+                    <Field label="Last Name"  id="lastName"  placeholder="Doe" />
+                    <Field label="Email"  id="email"  placeholder="john@example.com" type="email" />
+                    <Field label="Phone"  id="phone"  placeholder="+1 (555) 000-0000" />
+                    <Field label="Address" id="address" placeholder="123 Main Street" span />
+                    <Field label="City"  id="city"  placeholder="New York" />
+                    <Field label="State" id="state" placeholder="NY" />
+                    <Field label="ZIP Code" id="zip" placeholder="10001" />
+                  </div>
+                  <ShinyButton style={{ marginTop: 24, width: '100%' }} onClick={() => setStep(2)}>Continue to Payment →</ShinyButton>
+                </AnimatedCard>
+              )}
+              {step === 2 && (
+                <AnimatedCard hoverScale={1.01} style={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: '16px', padding: '30px' }}>
+                  <div className="form-card-title">PAYMENT</div>
+                  <div className="payment-icons">
+                    {["VISA", "MC", "AMEX", "PayPal"].map(c => <span key={c} className="payment-icon">{c}</span>)}
+                  </div>
+                  <div style={{ background:"rgba(255,214,10,.08)", border:"1px solid rgba(255,214,10,.2)", borderRadius:"var(--radius)", padding:"10px 14px", fontSize:13, color:"#666", marginBottom:20 }}>
+                    Mock checkout — no real payment will be processed.
+                  </div>
+                  <div className="form-grid">
+                    <Field label="Cardholder Name" id="cardName" placeholder="John Doe" span />
+                    <Field label="Card Number" id="cardNum" placeholder="4242 4242 4242 4242" span />
+                    <Field label="Expiry (MM/YY)" id="expiry" placeholder="12/27" />
+                    <Field label="CVV" id="cvv" placeholder="123" />
                 </div>
                 <div style={{ display:"flex", gap:12, marginTop:24 }}>
-                  <button className="btn btn-outline" onClick={() => setStep(1)}>← Back</button>
-                  <button className="btn btn-primary" style={{ flex:1 }} onClick={() => setStep(3)}>Place Order — ${grandTotal.toLocaleString()}</button>
+                  <ShinyButton style={{ background: 'transparent', border: '1px solid #333' }} onClick={() => setStep(1)}>← Back</ShinyButton>
+                  <ShinyButton style={{ flex:1 }} onClick={() => setStep(3)}>Place Order — ${grandTotal.toLocaleString()}</ShinyButton>
                 </div>
-              </div>
-            )}
-          </div>
-          <div className="cart-summary">
-            <div className="summary-title">YOUR ORDER</div>
-            {items.map(item => (
-              <div key={item.id} style={{ display:"flex", gap:10, alignItems:"center", marginBottom:14 }}>
-                <div style={{ flex:1 }}>
-                  <div style={{ fontSize:14, fontWeight:600 }}>{item.name}</div>
-                  <div style={{ fontSize:12, color:"var(--muted)" }}>Qty: {item.qty}</div>
+                </AnimatedCard>
+              )}
+            </div>
+          </FadeContent>
+          <FadeContent delay={400}>
+            <AnimatedCard style={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: '12px', padding: '30px' }}>
+              <div className="summary-title">YOUR ORDER</div>
+              {items.map(item => (
+                <div key={item.id} style={{ display:"flex", gap:10, alignItems:"center", marginBottom:14 }}>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:14, fontWeight:600, color: '#fff' }}>{item.name}</div>
+                    <div style={{ fontSize:12, color:"#666" }}>Qty: {item.qty}</div>
+                  </div>
+                  <div style={{ fontSize:14, fontWeight:600, color: '#fff' }}>$<CountUp end={item.price * item.qty} /></div>
                 </div>
-                <div style={{ fontSize:14, fontWeight:600 }}>${(item.price * item.qty).toLocaleString()}</div>
-              </div>
             ))}
             <hr className="divider" style={{ margin:"16px 0" }} />
-            <div className="summary-row"><span>Subtotal</span><span>${total.toLocaleString()}</span></div>
+            <div className="summary-row"><span>Subtotal</span><span>$<CountUp end={total} /></span></div>
             <div className="summary-row"><span>Shipping</span><span>{shipping === 0 ? "FREE" : `$${shipping}`}</span></div>
-            <div className="summary-row"><span>Tax</span><span>${tax.toLocaleString()}</span></div>
-            <div className="summary-row total"><span>Total</span><span>${grandTotal.toLocaleString()}</span></div>
-          </div>
+            <div className="summary-row"><span>Tax</span><span>$<CountUp end={tax} /></span></div>
+            <div className="summary-row total"><span>Total</span><span>$<CountUp end={grandTotal} /></span></div>
+            </AnimatedCard>
+          </FadeContent>
         </div>
       </div>
     </div>
