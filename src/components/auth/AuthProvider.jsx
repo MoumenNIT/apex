@@ -53,6 +53,17 @@ export const AuthProvider = ({ children }) => {
       },
     });
     if (error) throw error;
+
+    if (data?.user) {
+      const profilePayload = {
+        id: data.user.id,
+        email,
+        first_name: metadata.first_name || '',
+        last_name: metadata.last_name || '',
+        is_admin: metadata.is_admin || false,
+      };
+      await supabase.from('users').upsert(profilePayload);
+    }
     return data;
   };
 
