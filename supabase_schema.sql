@@ -439,5 +439,49 @@ CREATE POLICY "Users can update own reviews" ON reviews
   FOR UPDATE USING (auth.uid() = user_id);
 
 -- ===================================================================
+-- 14. ADMIN AUDIT LOGS TABLE
+-- ===================================================================
+CREATE TABLE IF NOT EXISTS admin_audit_logs (
+  id BIGSERIAL PRIMARY KEY,
+  admin_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  admin_email TEXT,
+  action TEXT NOT NULL,
+  details JSONB DEFAULT '{}',
+  ip_address TEXT,
+  user_agent TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_audit_logs_admin_id ON admin_audit_logs(admin_id);
+CREATE INDEX idx_audit_logs_action ON admin_audit_logs(action);
+CREATE INDEX idx_audit_logs_created_at ON admin_audit_logs(created_at);
+
+-- Enable RLS for audit logs
+ALTER TABLE admin_audit_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Only admins can view audit logs" ON admin_audit_logs
+  FOR SELECT USING (
+    EXISTS (SELECT 1 FROM users WHERE users.id = auth.uid() AND users.is_admin = TRUE)
+  );
+
+-- ===================================================================
+-- 15. SYSTEM SETTINGS TABLE
+-- ===================================================================
+CREATE TABLE IF NOT EXISTS system_settings (
+  id BIGSERIAL PRIMARY KEY,
+  key TEXT NOT NULL UNIQUE,
+  value JSONB DEFAULT '{}',
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Enable RLS for system settings
+ALTER TABLE system_settings ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Only admins can manage system settings" ON system_settings
+  FOR ALL USING (
+    EXISTS (SELECT 1 FROM users WHERE users.id = auth.uid() AND users.is_admin = TRUE)
+  );
+
+-- ===================================================================
 -- END OF SCHEMA
 -- ===================================================================
