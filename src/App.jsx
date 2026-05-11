@@ -5,6 +5,12 @@ import { AuthProvider, useAuth } from "./components/auth/AuthProvider";
 import LoginForm from "./components/forms/LoginForm";
 import RegisterForm from "./components/forms/RegisterForm";
 import UserDashboard from "./components/dashboard/UserDashboard";
+import FadeContent from "./components/ui/FadeContent";
+import AnimatedCard from "./components/ui/AnimatedCard";
+import ShinyButton from "./components/ui/ShinyButton";
+import CountUp from "./components/ui/CountUp";
+import TextRotate from "./components/ui/TextRotate";
+import TiltCard from "./components/ui/TiltCard";
 
 /* ─────────────────────────────────────────────
    1. DATA — mock product catalogue
@@ -527,39 +533,58 @@ function ProductCard({ product: p, navigate, addToast }) {
     addToast(`${p.name} added to cart!`);
   }
   return (
-    <div className="product-card" onClick={() => navigate(`#/product/${p.slug}`)}>
-      <div className="product-card-img" style={{ background: `${p.color}18` }}>
-        {p.badge && <span className="product-badge">{p.badge}</span>}
-      </div>
-      <div className="product-card-body">
-        <div className="product-category">{p.category}</div>
-        <div className="product-name">{p.name}</div>
-        <div className="product-tagline">{p.tagline}</div>
-        <div className="product-specs-mini">
-          {[
-            { label: "CPU", val: p.specs.cpu.split(" ").slice(-2).join(" ") },
-            { label: "GPU", val: p.specs.gpu.split(" ").slice(-3).join(" ") },
-            { label: "RAM", val: p.specs.ram },
-            { label: "Storage", val: p.specs.storage.split("+")[0].trim() },
-          ].map(s => (
-            <div key={s.label} className="spec-mini-item">{s.label}<strong>{s.val}</strong></div>
-          ))}
+    <TiltCard>
+      <AnimatedCard 
+        hoverScale={1.03}
+        hoverElevation={15}
+        glowColor={`${p.color}30`}
+        style={{ 
+          background: '#1a1a2e', 
+          border: '1px solid #333', 
+          borderRadius: '16px', 
+          overflow: 'hidden', 
+          cursor: 'pointer',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+        onClick={() => navigate(`#/product/${p.slug}`)}
+      >
+        <div style={{ height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', background: `${p.color}15` }}>
+          {p.badge && <span style={{ position: 'absolute', top: '14px', left: '14px', background: p.color, color: 'white', fontSize: '11px', fontWeight: '700', padding: '4px 10px', borderRadius: '100px', letterSpacing: '0.5px' }}>{p.badge}</span>}
+          <div style={{ fontSize: '48px', fontWeight: 'bold', color: p.color }}>{p.name.charAt(0)}</div>
         </div>
-        <div className="product-card-footer">
-          <div>
-            <div style={{ display: "flex", alignItems: "baseline" }}>
-              <span className="product-price">${p.price.toLocaleString()}</span>
-              {p.originalPrice && <span className="product-price-orig">${p.originalPrice.toLocaleString()}</span>}
+        <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ fontSize: '11px', fontWeight: '600', letterSpacing: '2px', textTransform: 'uppercase', color: '#666', marginBottom: '8px' }}>{p.category}</div>
+          <FadeContent>
+            <div style={{ fontSize: '20px', fontWeight: '700', marginBottom: '6px', color: '#fff' }}>{p.name}</div>
+            <div style={{ fontSize: '13px', color: '#666', marginBottom: '16px', lineHeight: '1.5' }}>{p.tagline}</div>
+          </FadeContent>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '16px' }}>
+            {[
+              { label: "CPU", val: p.specs.cpu.split(" ").slice(-2).join(" ") },
+              { label: "GPU", val: p.specs.gpu.split(" ").slice(-3).join(" ") },
+              { label: "RAM", val: p.specs.ram },
+              { label: "Storage", val: p.specs.storage.split("+")[0].trim() },
+            ].map(s => (
+              <div key={s.label} style={{ fontSize: '11px', color: '#666' }}>{s.label}<strong style={{ color: '#fff', display: 'block', fontSize: '12px' }}>{s.val}</strong></div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid #333' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'baseline' }}>
+                <span style={{ fontSize: '26px', fontWeight: '700', color: '#fff' }}>$<CountUp end={p.price} /></span>
+                {p.originalPrice && <span style={{ fontSize: '18px', color: '#666', textDecoration: 'line-through', marginLeft: '8px' }}>${p.originalPrice.toLocaleString()}</span>}
+              </div>
             </div>
             <div className="product-rating">
               <Stars rating={p.rating} />
               <span style={{ color: "var(--muted)" }}>({p.reviews})</span>
             </div>
           </div>
-          <button className="btn btn-primary btn-sm" onClick={handleAdd}>+ Cart</button>
+          <ShinyButton style={{ width: '100%', padding: '10px' }} onClick={handleAdd}>+ Cart</ShinyButton>
         </div>
-      </div>
-    </div>
+      </AnimatedCard>
+    </TiltCard>
   );
 }
 
@@ -574,33 +599,43 @@ function HomePage({ navigate, addToast }) {
       <section className="hero">
         <div className="container hero-grid">
           <div>
-            <div className="hero-eyebrow">// Next-Gen Performance Systems</div>
-            <h1 className="hero-title">BUILD YOUR<br /><span className="hl">LEGEND</span></h1>
-            <p className="hero-sub">Hand-assembled performance PCs engineered for dominance. From esports champions to Hollywood studios.</p>
-            <div className="hero-cta">
-              <button className="btn btn-primary" onClick={() => navigate("#/products")}>Shop All PCs →</button>
-              <button className="btn btn-outline" onClick={() => navigate("#/products")}>View Builds</button>
-            </div>
-            <div className="hero-stats">
-              {[{num:"50K+",label:"PCs Shipped"},{num:"4.9★",label:"Avg Rating"},{num:"3-5yr",label:"Warranty"},{num:"24/7",label:"Support"}].map(s => (
-                <div key={s.label}>
-                  <div className="hero-stat-num">{s.num}</div>
-                  <div className="hero-stat-label">{s.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="hero-visual">
-            <div className="hero-gfx">
-              <span className="hero-pc-art">🖥️</span>
-              <div className="hero-pc-label">APEX PREDATOR X</div>
-              <div className="hero-spec-pills">
-                {["RTX 4090","i9-14900KS","64GB DDR5","4K@165fps"].map(s => (
-                  <span key={s} className="spec-pill">{s}</span>
+            <FadeContent>
+              <div className="hero-eyebrow">// Next-Gen Performance Systems</div>
+              <h1 className="hero-title">BUILD YOUR<br /><span className="hl">LEGEND</span></h1>
+              <p className="hero-sub">Hand-assembled performance PCs engineered for dominance. From esports champions to Hollywood studios.</p>
+            </FadeContent>
+            <FadeContent delay={200}>
+              <div className="hero-cta">
+                <ShinyButton onClick={() => navigate("#/products")}>Shop All PCs →</ShinyButton>
+                <ShinyButton style={{ background: 'transparent', border: '1px solid #333' }} onClick={() => navigate("#/products")}>View Builds</ShinyButton>
+              </div>
+            </FadeContent>
+            <FadeContent delay={400}>
+              <div className="hero-stats">
+                {[{num:"50K+",label:"PCs Shipped"},{num:"4.9",label:"Avg Rating"},{num:"3-5yr",label:"Warranty"},{num:"24/7",label:"Support"}].map(s => (
+                  <div key={s.label}>
+                    <div className="hero-stat-num">{s.num}</div>
+                    <div className="hero-stat-label">{s.label}</div>
+                  </div>
                 ))}
               </div>
-            </div>
+            </FadeContent>
           </div>
+          <FadeContent delay={600}>
+            <div className="hero-visual">
+              <AnimatedCard hoverScale={1.05} style={{ height: '100%' }}>
+                <div className="hero-gfx">
+                  <span className="hero-pc-art">PC</span>
+                  <div className="hero-pc-label">APEX PREDATOR X</div>
+                  <div className="hero-spec-pills">
+                    {["RTX 4090","i9-14900KS","64GB DDR5","4K@165fps"].map(s => (
+                      <span key={s} className="spec-pill">{s}</span>
+                    ))}
+                  </div>
+                </div>
+              </AnimatedCard>
+            </div>
+          </FadeContent>
         </div>
       </section>
 
@@ -608,36 +643,39 @@ function HomePage({ navigate, addToast }) {
 
       <section className="section">
         <div className="container">
-          <div className="props-grid">
-            {[
-              { icon:"⚡", title:"Same-Day Build",   text:"Orders placed before 2pm ship same business day, fully tested and quality-checked." },
-              { icon:"🛡️", title:"3–5 Year Warranty", text:"Industry-leading coverage with on-site support. We stand behind every build." },
-              { icon:"🔧", title:"Free Upgrades",     text:"Lifetime upgrade consulting. Bring your Apex PC back at any time for component swaps." },
-              { icon:"💬", title:"Expert Support",    text:"Real engineers, not chatbots. Available 24/7 via phone, chat, or email." },
-            ].map(p => (
-              <div key={p.title} className="prop-card">
-                <span className="prop-icon">{p.icon}</span>
-                <div className="prop-title">{p.title}</div>
-                <p className="prop-text">{p.text}</p>
-              </div>
-            ))}
-          </div>
+          <FadeContent>
+            <div className="props-grid">
+              {[
+                { icon:"⚡", title:"Same-Day Build",   text:"Orders placed before 2pm ship same business day, fully tested and quality-checked." },
+                { icon:"🛡️", title:"3–5 Year Warranty", text:"Industry-leading coverage with on-site support. We stand behind every build." },
+                { icon:"🔧", title:"Free Upgrades",     text:"Lifetime upgrade consulting. Bring your Apex PC back at any time for component swaps." },
+                { icon:"💬", title:"Expert Support",    text:"Real engineers, not chatbots. Available 24/7 via phone, chat, or email." },
+              ].map(p => (
+                <AnimatedCard key={p.title} hoverScale={1.02} style={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: '12px', padding: '30px' }}>
+                  <span className="prop-icon">{p.icon}</span>
+                  <div className="prop-title">{p.title}</div>
+                  <p className="prop-text">{p.text}</p>
+                </AnimatedCard>
+              ))}
+            </div>
+          </FadeContent>
         </div>
       </section>
 
       <section className="section" style={{ paddingTop: 0 }}>
         <div className="container">
-          <div className="section-header">
-            <div className="section-eyebrow">// Top Picks</div>
-            <h2 className="section-title">FEATURED BUILDS</h2>
-            <p className="section-sub">Our most popular systems — hand-picked by our engineers.</p>
-          </div>
-          <div className="products-grid">
-            {featured.map(p => <ProductCard key={p.id} product={p} navigate={navigate} addToast={addToast} />)}
-          </div>
-          <div style={{ textAlign: "center", marginTop: 40 }}>
-            <button className="btn btn-outline" onClick={() => navigate("#/products")}>View All Products →</button>
-          </div>
+          <FadeContent delay={200}>
+            <div className="section-header">
+              <div className="section-eyebrow">// Top Picks</div>
+              <h2 className="section-title">FEATURED BUILDS</h2>
+              <p className="section-sub">Our most popular systems — hand-picked by our engineers.</p>
+            </div>
+          </FadeContent>
+          <FadeContent delay={400}>
+            <div className="products-grid">
+              {featured.map(p => <ProductCard key={p.id} product={p} navigate={navigate} addToast={addToast} />)}
+            </div>
+          </FadeContent>
         </div>
       </section>
     </div>
