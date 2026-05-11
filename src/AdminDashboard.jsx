@@ -687,7 +687,6 @@ export default function AdminDashboard() {
                     <tr key={product.id} style={styles.tableRow}>
                       <td style={styles.tableCell}>
                         <div style={styles.productCell}>
-                          <span style={styles.productEmoji}>{product.emoji || '📦'}</span>
                           <div>
                             <div style={styles.productName}>{product.name}</div>
                             <div style={styles.productSlug}>{product.slug}</div>
@@ -1268,7 +1267,6 @@ const styles = {
 
   // Product Cells
   productCell: { display: 'flex', alignItems: 'center', gap: '12px' },
-  productEmoji: { fontSize: '24px' },
   productName: { fontWeight: '600', color: '#fff' },
   productSlug: { fontSize: '12px', color: '#666' },
   priceCell: { display: 'flex', flexDirection: 'column', gap: '4px' },

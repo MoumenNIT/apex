@@ -24,7 +24,7 @@ const PRODUCTS = [
       os: "Windows 11 Pro",
     },
     highlights: ["4K Ultra at 144fps+", "PCIe 5.0 storage", "Wi-Fi 7 & BT 5.4", "3-yr warranty"],
-    color: "#e63946", emoji: "🔴",
+    color: "#e63946",
   },
   {
     id: 2, slug: "volt-pro-creator",
@@ -44,7 +44,7 @@ const PRODUCTS = [
       os: "Windows 11 Pro for Workstations",
     },
     highlights: ["ECC memory for stability", "Thunderbolt 4 x4", "10GbE networking", "5-yr on-site warranty"],
-    color: "#8e44ad", emoji: "🟣",
+    color: "#8e44ad",
   },
   {
     id: 3, slug: "stealth-mini-g",
@@ -64,7 +64,7 @@ const PRODUCTS = [
       os: "Windows 11 Home",
     },
     highlights: ["ITX form factor 6L", "PCIe 4.0 x4 NVMe", "USB4 40Gbps", "Silent fan curve"],
-    color: "#27ae60", emoji: "🟢",
+    color: "#27ae60",
   },
   {
     id: 4, slug: "titan-office-pro",
@@ -84,7 +84,7 @@ const PRODUCTS = [
       os: "Windows 11 Pro",
     },
     highlights: ["vPro remote management", "Dual 4K display support", "TPM 2.0 security", "5yr business warranty"],
-    color: "#2980b9", emoji: "🔵",
+    color: "#2980b9",
   },
   {
     id: 5, slug: "nova-budget-gamer",
@@ -103,8 +103,8 @@ const PRODUCTS = [
       psu: "550W 80+ Bronze",
       os: "Windows 11 Home",
     },
-    highlights: ["1440p capable", "DLSS 3 Frame Gen", "RGB lighting", "Upgradeable platform"],
-    color: "#f39c12", emoji: "🟡",
+    highlights: ["1080p esports ready", "PCIe 4.0 support", "RGB lighting", "3yr warranty"],
+    color: "#f39c12",
   },
   {
     id: 6, slug: "apex-streamer-s1",
@@ -124,7 +124,7 @@ const PRODUCTS = [
       os: "Windows 11 Home",
     },
     highlights: ["Dual-PC in one chassis", "AV1 encode/decode", "Capture card ready", "OBS-optimised BIOS"],
-    color: "#e74c3c", emoji: "🔴",
+    color: "#e74c3c",
   },
 ];
 
@@ -274,7 +274,6 @@ const CSS = `
   .product-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: all .25s; cursor: pointer; display: flex; flex-direction: column; }
   .product-card:hover { border-color: var(--border2); transform: translateY(-4px); box-shadow: 0 20px 48px rgba(0,0,0,.4); }
   .product-card-img { height: 200px; display: flex; align-items: center; justify-content: center; position: relative; }
-  .product-card-emoji { font-size: 80px; }
   .product-badge { position: absolute; top: 14px; left: 14px; background: var(--accent); color: white; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 100px; letter-spacing: .5px; }
   .product-card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
   .product-category { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
@@ -302,7 +301,6 @@ const CSS = `
   /* Detail Page */
   .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; padding: 60px 0; }
   .detail-visual { background: var(--bg2); border: 1px solid var(--border); border-radius: 20px; padding: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: sticky; top: 96px; gap: 24px; }
-  .detail-emoji { font-size: 160px; }
   .detail-name { font-family: var(--font-display); font-size: 56px; letter-spacing: 2px; line-height: 1; }
   .detail-tagline { font-size: 18px; color: var(--muted); line-height: 1.6; }
   .detail-price-row { display: flex; align-items: baseline; gap: 12px; margin: 8px 0; }
@@ -527,7 +525,6 @@ function ProductCard({ product: p, navigate, addToast }) {
   return (
     <div className="product-card" onClick={() => navigate(`#/product/${p.slug}`)}>
       <div className="product-card-img" style={{ background: `${p.color}18` }}>
-        <span className="product-card-emoji">{p.emoji}</span>
         {p.badge && <span className="product-badge">{p.badge}</span>}
       </div>
       <div className="product-card-body">
@@ -753,7 +750,6 @@ function ProductDetailPage({ slug, navigate, addToast }) {
         </div>
         <div className="detail-grid">
           <div className="detail-visual" style={{ background: `${product.color}10` }}>
-            <span className="detail-emoji">{product.emoji}</span>
             <div style={{ textAlign: "center" }}>
               <div style={{ fontSize: 12, letterSpacing: 3, textTransform: "uppercase", color: "var(--muted)", fontFamily: "var(--font-mono)" }}>
                 {product.category} · {product.brand}
@@ -842,7 +838,6 @@ function CartPage({ navigate }) {
           <div className="cart-items">
             {items.map(item => (
               <div key={item.id} className="cart-item">
-                <span className="cart-item-img">{item.emoji}</span>
                 <div style={{ flex: 1 }}>
                   <div className="cart-item-name">{item.name}</div>
                   <div className="cart-item-cat">{item.category} · {item.brand}</div>
@@ -988,7 +983,6 @@ function CheckoutPage({ navigate }) {
             <div className="summary-title">YOUR ORDER</div>
             {items.map(item => (
               <div key={item.id} style={{ display:"flex", gap:10, alignItems:"center", marginBottom:14 }}>
-                <span style={{ fontSize:28 }}>{item.emoji}</span>
                 <div style={{ flex:1 }}>
                   <div style={{ fontSize:14, fontWeight:600 }}>{item.name}</div>
                   <div style={{ fontSize:12, color:"var(--muted)" }}>Qty: {item.qty}</div>
