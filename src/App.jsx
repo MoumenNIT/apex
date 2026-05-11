@@ -1,6 +1,10 @@
 import { useState, useContext, createContext, useReducer, useEffect, useCallback } from "react";
 import { supabase, db } from "./lib/supabase";
 import AdminDashboard from "./AdminDashboard";
+import { AuthProvider, useAuth } from "./components/auth/AuthProvider";
+import LoginForm from "./components/forms/LoginForm";
+import RegisterForm from "./components/forms/RegisterForm";
+import UserDashboard from "./components/dashboard/UserDashboard";
 
 /* ─────────────────────────────────────────────
    1. DATA — mock product catalogue
@@ -1098,6 +1102,10 @@ export default function App() {
   else if (hash.startsWith("#/product/"))               page = <ProductDetailPage slug={hash.replace("#/product/", "")} navigate={navigate} addToast={addToast} />;
   else if (hash === "#/cart")                            page = <CartPage navigate={navigate} />;
   else if (hash === "#/checkout")                        page = <CheckoutPage navigate={navigate} />;
+  else if (hash === "#/login")                           page = <LoginForm />;
+  else if (hash === "#/register")                        page = <RegisterForm />;
+  else if (hash === "#/dashboard")                       page = <UserDashboard />;
+  else if (hash === "#/admin")                           page = <AdminDashboard />;
   else page = (
     <div className="page" style={{ textAlign:"center", paddingTop:80 }}>
       <div style={{ fontSize:60 }}>🗺️</div>
@@ -1107,12 +1115,14 @@ export default function App() {
   );
 
   return (
-    <CartProvider>
-      <style dangerouslySetInnerHTML={{ __html: CSS }} />
-      <Navbar navigate={navigate} hash={hash} />
-      {page}
-      <Footer />
-      <Toast toasts={toasts} />
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <style dangerouslySetInnerHTML={{ __html: CSS }} />
+        <Navbar navigate={navigate} hash={hash} />
+        {page}
+        <Footer />
+        <Toast toasts={toasts} />
+      </CartProvider>
+    </AuthProvider>
   );
 }
