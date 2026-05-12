@@ -297,6 +297,18 @@ const CSS = `
   .product-price-orig { font-size: 14px; color: var(--muted); text-decoration: line-through; margin-left: 8px; }
   .product-rating { font-size: 12px; color: var(--gold); display: flex; align-items: center; gap: 4px; }
 
+  /* Testimonials Grid */
+  .testimonials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+
+  /* About Grid */
+  .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
+
+  /* Contact Grid */
+  .contact-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 32px; }
+  @media (max-width: 768px) {
+    .contact-grid { grid-template-columns: 1fr; }
+  }
+
   /* Filters */
   .filters { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 32px; display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-end; }
   .filter-group { display: flex; flex-direction: column; gap: 6px; }
@@ -460,14 +472,14 @@ function Navbar({ navigate, hash }) {
       <div className="container nav-inner">
         <button className="nav-logo" onClick={() => navigate("#/")}>APEX<span>SYS</span></button>
         <div className="nav-links">
-          {[["#/", "Home"], ["#/products", "Products"]].map(([path, label]) => (
+          {[["#/", "Home"], ["#/products", "Products"], ["#/about", "About"], ["#/faq", "FAQ"], ["#/contact", "Contact"]].map(([path, label]) => (
             <button key={path} className={`nav-link${hash === path ? " active" : ""}`} onClick={() => navigate(path)}>
               {label}
             </button>
           ))}
         </div>
         <button className="cart-btn" onClick={() => navigate("#/cart")}>
-          🛒 Cart {count > 0 && <span className="cart-badge">{count}</span>}
+          Cart {count > 0 && <span className="cart-badge">{count}</span>}
         </button>
       </div>
     </nav>
@@ -594,6 +606,16 @@ function ProductCard({ product: p, navigate, addToast }) {
 
 function HomePage({ navigate, addToast }) {
   const featured = PRODUCTS.filter(p => p.badge).slice(0, 3);
+  const tiersByCategory = CATEGORIES.filter(c => c !== "All").map(cat => {
+    const prods = PRODUCTS.filter(p => p.category === cat);
+    return {
+      category: cat,
+      minPrice: Math.min(...prods.map(p => p.price)),
+      maxPrice: Math.max(...prods.map(p => p.price)),
+      count: prods.length
+    };
+  });
+
   return (
     <div className="page">
       <section className="hero">
@@ -644,15 +666,19 @@ function HomePage({ navigate, addToast }) {
       <section className="section">
         <div className="container">
           <FadeContent>
+            <div className="section-header" style={{ marginBottom: '48px' }}>
+              <div className="section-eyebrow">// Why Choose Apex</div>
+              <h2 className="section-title">WHY WE'RE DIFFERENT</h2>
+            </div>
             <div className="props-grid">
               {[
-                { icon:"⚡", title:"Same-Day Build",   text:"Orders placed before 2pm ship same business day, fully tested and quality-checked." },
-                { icon:"🛡️", title:"3–5 Year Warranty", text:"Industry-leading coverage with on-site support. We stand behind every build." },
-                { icon:"🔧", title:"Free Upgrades",     text:"Lifetime upgrade consulting. Bring your Apex PC back at any time for component swaps." },
-                { icon:"💬", title:"Expert Support",    text:"Real engineers, not chatbots. Available 24/7 via phone, chat, or email." },
+                { icon: "⚙️", title: "Hand-Assembled", text: "Every system is built by expert technicians with 10+ years experience. No rushing, no shortcuts." },
+                { icon: "✓", title: "72-Hour Testing", text: "Every PC undergoes intensive stress testing before shipping. We guarantee stability and performance." },
+                { icon: "⭐", title: "Premium Support", text: "Real engineers available 24/7. Not a support ticket system, direct access to the team." },
+                { icon: "♻️", title: "Lifetime Upgrades", text: "Bring your Apex back anytime for free component consultations and upgrades at cost." },
               ].map(p => (
                 <AnimatedCard key={p.title} hoverScale={1.02} style={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: '12px', padding: '30px' }}>
-                  <span className="prop-icon">{p.icon}</span>
+                  <div style={{ fontSize: '36px', marginBottom: '16px', display: 'block' }}>{p.icon}</div>
                   <div className="prop-title">{p.title}</div>
                   <p className="prop-text">{p.text}</p>
                 </AnimatedCard>
@@ -662,7 +688,59 @@ function HomePage({ navigate, addToast }) {
         </div>
       </section>
 
-      <section className="section" style={{ paddingTop: 0 }}>
+      <section className="section" style={{ background: '#0f0f1a' }}>
+        <div className="container">
+          <FadeContent>
+            <div className="section-header">
+              <div className="section-eyebrow">// Product Range</div>
+              <h2 className="section-title">PERFORMANCE SPECTRUM</h2>
+              <p className="section-sub">Find the perfect system for your budget and performance needs.</p>
+            </div>
+          </FadeContent>
+          <FadeContent delay={200}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
+              {tiersByCategory.map((tier, idx) => (
+                <AnimatedCard 
+                  key={tier.category} 
+                  hoverScale={1.02}
+                  style={{ 
+                    background: '#1a1a2e', 
+                    border: '1px solid #333', 
+                    borderRadius: '12px', 
+                    padding: '24px',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onClick={() => navigate("#/products")}
+                >
+                  <div style={{ fontSize: '24px', fontWeight: '700', color: '#e63946', marginBottom: '12px' }}>
+                    {tier.category}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '12px' }}>
+                    <div>
+                      <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>Starting at</div>
+                      <div style={{ fontSize: '24px', fontWeight: '700', color: '#fff' }}>
+                        $<CountUp end={tier.minPrice} />
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>Up to</div>
+                      <div style={{ fontSize: '18px', fontWeight: '600', color: '#ccc' }}>
+                        $<CountUp end={tier.maxPrice} />
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#666', paddingTop: '12px', borderTop: '1px solid #333' }}>
+                    {tier.count} available system{tier.count !== 1 ? 's' : ''}
+                  </div>
+                </AnimatedCard>
+              ))}
+            </div>
+          </FadeContent>
+        </div>
+      </section>
+
+      <section className="section">
         <div className="container">
           <FadeContent delay={200}>
             <div className="section-header">
@@ -675,6 +753,146 @@ function HomePage({ navigate, addToast }) {
             <div className="products-grid">
               {featured.map(p => <ProductCard key={p.id} product={p} navigate={navigate} addToast={addToast} />)}
             </div>
+          </FadeContent>
+        </div>
+      </section>
+
+      <section className="section" style={{ background: '#0f0f1a' }}>
+        <div className="container">
+          <FadeContent>
+            <div className="section-header">
+              <div className="section-eyebrow">// By the Numbers</div>
+              <h2 className="section-title">OUR TRACK RECORD</h2>
+              <p className="section-sub">Trusted by thousands of professionals and enthusiasts worldwide.</p>
+            </div>
+          </FadeContent>
+          <FadeContent delay={200}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px', marginBottom: '40px' }}>
+              {[
+                { label: "Systems Shipped", value: 50000 },
+                { label: "Happy Customers", value: 48000 },
+                { label: "Avg Rating", value: 4.9, suffix: '/5' },
+                { label: "Years in Business", value: 5 },
+              ].map((stat, i) => (
+                <AnimatedCard key={stat.label} hoverScale={1.02} style={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: '12px', padding: '30px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '48px', fontWeight: '700', color: '#e63946', marginBottom: '8px' }}>
+                    <CountUp end={stat.value} />{stat.suffix || ''}
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#ccc' }}>{stat.label}</div>
+                </AnimatedCard>
+              ))}
+            </div>
+          </FadeContent>
+          <FadeContent delay={400}>
+            <AnimatedCard hoverScale={1.01} style={{ background: 'linear-gradient(135deg, rgba(230,57,70,0.1) 0%, rgba(45,31,61,0.1) 100%)', border: '1px solid #333', borderRadius: '16px', padding: '40px', textAlign: 'center' }}>
+              <h3 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '12px', color: '#fff' }}>Industry Recognition</h3>
+              <p style={{ fontSize: '15px', color: '#ccc', marginBottom: '20px' }}>Featured in leading tech publications for innovation and customer satisfaction.</p>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap', fontSize: '12px', color: '#666' }}>
+                {['TechReview', 'PCGamer', 'GamersNexus', 'LTT'].map(pub => (
+                  <span key={pub} style={{ background: '#0f0f1a', padding: '8px 16px', borderRadius: '6px', border: '1px solid #333' }}>
+                    {pub}
+                  </span>
+                ))}
+              </div>
+            </AnimatedCard>
+          </FadeContent>
+        </div>
+      </section>
+
+      <section className="section" style={{ background: '#0f0f1a' }}>
+        <div className="container">
+          <FadeContent>
+            <div className="section-header">
+              <div className="section-eyebrow">// What Our Customers Say</div>
+              <h2 className="section-title">TESTIMONIALS</h2>
+              <p className="section-sub">Real feedback from real customers who trust Apex for their performance needs.</p>
+            </div>
+          </FadeContent>
+          <FadeContent delay={200}>
+            <div className="testimonials-grid">
+              {[
+                { name: "Alex Chen", role: "Professional Gamer", text: "The Apex Predator X is absolutely insane. 4K at 165fps with zero throttling. Best investment I've ever made for my streaming setup." },
+                { name: "Sarah Mitchell", role: "Video Editor", text: "Rendering times dropped by 60%. The build quality is exceptional, and their support team helped me optimize my workflow perfectly." },
+                { name: "James Rodriguez", role: "Software Developer", text: "Finally a company that understands what developers need. Fast, reliable, and the upgrade path is seamless. Highly recommended." },
+              ].map((t, i) => (
+                <AnimatedCard key={i} hoverScale={1.02} style={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: '12px', padding: '30px' }}>
+                  <div style={{ fontSize: '24px', marginBottom: '16px', color: '#e63946' }}>"</div>
+                  <p style={{ fontSize: '15px', lineHeight: '1.6', color: '#ccc', marginBottom: '20px' }}>{t.text}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 'bold', color: '#fff' }}>{t.name.charAt(0)}</div>
+                    <div>
+                      <div style={{ fontSize: '16px', fontWeight: '600', color: '#fff' }}>{t.name}</div>
+                      <div style={{ fontSize: '13px', color: '#666' }}>{t.role}</div>
+                    </div>
+                  </div>
+                </AnimatedCard>
+              ))}
+            </div>
+          </FadeContent>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="container">
+          <FadeContent>
+            <div className="section-header">
+              <div className="section-eyebrow">// Custom Builds</div>
+              <h2 className="section-title">BUILD YOUR OWN</h2>
+              <p className="section-sub">Can't find the perfect system? Customize every component to match your exact needs and budget.</p>
+            </div>
+          </FadeContent>
+          <FadeContent delay={200}>
+            <AnimatedCard hoverScale={1.02} style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #2d1f3d 100%)', border: '1px solid #333', borderRadius: '16px', padding: '50px', textAlign: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '24px' }}>
+                <div style={{ fontSize: '48px' }}>⚙️</div>
+                <div>
+                  <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#fff' }}>Full Customization</h3>
+                </div>
+              </div>
+              <p style={{ fontSize: '16px', color: '#ccc', marginBottom: '28px', maxWidth: '600px', margin: '0 auto 28px' }}>
+                Choose your CPU, GPU, RAM, storage, cooling, and more. Our experts will help ensure compatibility and optimize for your workload.
+              </p>
+              <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <ShinyButton onClick={() => navigate("#/contact")}>Request Custom Build</ShinyButton>
+                <ShinyButton style={{ background: 'transparent', border: '1px solid #333' }} onClick={() => navigate("#/faq")}>See FAQ</ShinyButton>
+              </div>
+            </AnimatedCard>
+          </FadeContent>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="container">
+          <FadeContent>
+            <div className="section-header">
+              <div className="section-eyebrow">// Join Our Community</div>
+              <h2 className="section-title">STAY UPDATED</h2>
+              <p className="section-sub">Get exclusive deals, new product announcements, and tech tips delivered to your inbox.</p>
+            </div>
+          </FadeContent>
+          <FadeContent delay={200}>
+            <AnimatedCard style={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: '12px', padding: '40px', maxWidth: '600px', margin: '0 auto' }}>
+              <div style={{ display: 'flex', gap: '12px', flexDirection: 'column' }}>
+                <input type="email" placeholder="Enter your email" style={{ padding: '14px', borderRadius: '8px', border: '1px solid #333', background: '#0f0f1a', color: '#fff', fontSize: '15px' }} />
+                <ShinyButton style={{ padding: '14px' }}>Subscribe to Newsletter</ShinyButton>
+              </div>
+              <p style={{ fontSize: '12px', color: '#666', marginTop: '16px', textAlign: 'center' }}>No spam, unsubscribe anytime. We respect your privacy.</p>
+            </AnimatedCard>
+          </FadeContent>
+        </div>
+      </section>
+
+      <section className="section" style={{ background: '#0f0f1a' }}>
+        <div className="container">
+          <FadeContent>
+            <AnimatedCard hoverScale={1.02} style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #2d1f3d 100%)', border: '1px solid #333', borderRadius: '16px', padding: '60px', textAlign: 'center' }}>
+              <h2 style={{ fontSize: '36px', fontWeight: '700', marginBottom: '16px', color: '#fff' }}>Ready to Build Your Legend?</h2>
+              <p style={{ fontSize: '18px', color: '#ccc', marginBottom: '32px', maxWidth: '600px', margin: '0 auto 32px' }}>Join thousands of professionals, gamers, and creators who trust Apex for their performance computing needs.</p>
+              <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <ShinyButton onClick={() => navigate("#/products")}>Shop Now</ShinyButton>
+                <ShinyButton style={{ background: 'transparent', border: '1px solid #333' }} onClick={() => navigate("#/contact")}>Contact Sales</ShinyButton>
+              </div>
+            </AnimatedCard>
           </FadeContent>
         </div>
       </section>
@@ -1085,6 +1303,195 @@ function CheckoutPage({ navigate }) {
   );
 }
 
+function AboutPage({ navigate }) {
+  return (
+    <div className="page">
+      <div className="container">
+        <FadeContent>
+          <div className="section-header">
+            <div className="section-eyebrow">// Our Story</div>
+            <h1 className="section-title">ABOUT APEX</h1>
+            <p className="section-sub">Building the future of performance computing, one system at a time.</p>
+          </div>
+        </FadeContent>
+        <FadeContent delay={200}>
+          <AnimatedCard style={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: '16px', padding: '40px', marginBottom: '40px' }}>
+            <h2 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '20px', color: '#fff' }}>Our Mission</h2>
+            <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#ccc', marginBottom: '20px' }}>
+              At Apex, we believe that performance computing should be accessible to everyone who needs it. From professional gamers to video editors, software developers to AI researchers, we build systems that empower creators and professionals to push the boundaries of what's possible.
+            </p>
+            <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#ccc' }}>
+              Every system we build is hand-assembled by expert technicians, stress-tested for 72 hours, and backed by industry-leading support. We don't just sell computers — we build partnerships with our customers, ensuring they have the tools they need to succeed.
+            </p>
+          </AnimatedCard>
+        </FadeContent>
+        <FadeContent delay={400}>
+          <div className="about-grid">
+            {[
+              { title: "Founded", value: "2019", desc: "With a vision to revolutionize performance computing" },
+              { title: "Systems Built", value: "50K+", desc: "And counting, each one custom-built to perfection" },
+              { title: "Countries", value: "25+", desc: "Serving customers across the globe" },
+              { title: "Team Size", value: "120+", desc: "Expert engineers, technicians, and support staff" },
+            ].map((stat, i) => (
+              <AnimatedCard key={i} hoverScale={1.02} style={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: '12px', padding: '30px', textAlign: 'center' }}>
+                <div style={{ fontSize: '48px', fontWeight: '700', color: '#e63946', marginBottom: '8px' }}>{stat.value}</div>
+                <div style={{ fontSize: '18px', fontWeight: '600', color: '#fff', marginBottom: '8px' }}>{stat.title}</div>
+                <p style={{ fontSize: '14px', color: '#666' }}>{stat.desc}</p>
+              </AnimatedCard>
+            ))}
+          </div>
+        </FadeContent>
+      </div>
+    </div>
+  );
+}
+
+function ContactPage({ navigate, addToast }) {
+  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+  const [sending, setSending] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSending(true);
+    setTimeout(() => {
+      addToast('Message sent successfully!');
+      setFormData({ name: '', email: '', subject: '', message: '' });
+      setSending(false);
+    }, 1000);
+  };
+
+  return (
+    <div className="page">
+      <div className="container">
+        <FadeContent>
+          <div className="section-header">
+            <div className="section-eyebrow">// Get in Touch</div>
+            <h1 className="section-title">CONTACT US</h1>
+            <p className="section-sub">Have questions? We're here to help. Reach out and we'll get back to you within 24 hours.</p>
+          </div>
+        </FadeContent>
+        <div className="contact-grid">
+          <FadeContent delay={200}>
+            <div>
+              <AnimatedCard style={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: '12px', padding: '30px', marginBottom: '20px' }}>
+                <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px', color: '#fff' }}>Contact Information</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#e63946' }}>@</div>
+                    <div>
+                      <div style={{ fontSize: '14px', color: '#666' }}>Email</div>
+                      <div style={{ fontSize: '16px', color: '#fff' }}>support@apexsys.com</div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#e63946' }}>P</div>
+                    <div>
+                      <div style={{ fontSize: '14px', color: '#666' }}>Phone</div>
+                      <div style={{ fontSize: '16px', color: '#fff' }}>+1 (888) 273-9277</div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#e63946' }}>L</div>
+                    <div>
+                      <div style={{ fontSize: '14px', color: '#666' }}>Location</div>
+                      <div style={{ fontSize: '16px', color: '#fff' }}>San Francisco, CA</div>
+                    </div>
+                  </div>
+                </div>
+              </AnimatedCard>
+              <AnimatedCard style={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: '12px', padding: '30px' }}>
+                <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px', color: '#fff' }}>Business Hours</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: '#ccc' }}>Monday - Friday</span>
+                    <span style={{ color: '#fff' }}>9:00 AM - 6:00 PM</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: '#ccc' }}>Saturday</span>
+                    <span style={{ color: '#fff' }}>10:00 AM - 4:00 PM</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: '#ccc' }}>Sunday</span>
+                    <span style={{ color: '#fff' }}>Closed</span>
+                  </div>
+                </div>
+              </AnimatedCard>
+            </div>
+          </FadeContent>
+          <FadeContent delay={400}>
+            <AnimatedCard style={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: '12px', padding: '30px' }}>
+              <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '20px', color: '#fff' }}>Send us a message</h3>
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', color: '#ccc', marginBottom: '8px' }}>Name</label>
+                  <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #333', background: '#0f0f1a', color: '#fff', fontSize: '15px' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', color: '#ccc', marginBottom: '8px' }}>Email</label>
+                  <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #333', background: '#0f0f1a', color: '#fff', fontSize: '15px' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', color: '#ccc', marginBottom: '8px' }}>Subject</label>
+                  <input type="text" value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})} required style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #333', background: '#0f0f1a', color: '#fff', fontSize: '15px' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', color: '#ccc', marginBottom: '8px' }}>Message</label>
+                  <textarea value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} required rows={5} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #333', background: '#0f0f1a', color: '#fff', fontSize: '15px', resize: 'vertical' }} />
+                </div>
+                <ShinyButton type="submit" disabled={sending} style={{ padding: '14px' }}>{sending ? 'Sending...' : 'Send Message'}</ShinyButton>
+              </form>
+            </AnimatedCard>
+          </FadeContent>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FAQPage({ navigate }) {
+  const [openIndex, setOpenIndex] = useState(null);
+
+  const faqs = [
+    { q: "What warranty do you offer on your systems?", a: "All our systems come with a standard 3-year warranty that includes parts and labor. We also offer extended warranty options up to 5 years. Our warranty covers all hardware components and includes on-site support for the first year." },
+    { q: "How long does shipping take?", a: "Standard shipping takes 3-5 business days. We also offer expedited shipping options (2-day and overnight) for urgent orders. All systems are fully tested and quality-checked before shipping to ensure they arrive in perfect condition." },
+    { q: "Can I customize my system configuration?", a: "Yes! We offer fully customizable systems. You can choose from various CPU, GPU, RAM, storage, and cooling options. Our team can also help you configure the perfect system for your specific needs and budget." },
+    { q: "Do you offer financing options?", a: "Yes, we offer flexible financing options through our partners. You can choose from monthly payment plans with competitive interest rates. Financing is available for qualified customers and can be applied for during checkout." },
+    { q: "What kind of support do you provide?", a: "We provide 24/7 technical support via phone, email, and live chat. Our support team consists of real engineers, not chatbots. We also offer remote desktop assistance for complex issues and have a comprehensive knowledge base available online." },
+    { q: "Can I upgrade my system later?", a: "Absolutely! All our systems are designed with upgradeability in mind. We offer lifetime upgrade consulting, and you can bring your system back to us at any time for component upgrades. We'll even give you credit for your old parts." },
+  ];
+
+  return (
+    <div className="page">
+      <div className="container">
+        <FadeContent>
+          <div className="section-header">
+            <div className="section-eyebrow">// Help Center</div>
+            <h1 className="section-title">FREQUENTLY ASKED QUESTIONS</h1>
+            <p className="section-sub">Find answers to common questions about our products, services, and policies.</p>
+          </div>
+        </FadeContent>
+        <FadeContent delay={200}>
+          <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+            {faqs.map((faq, i) => (
+              <AnimatedCard key={i} hoverScale={1.01} style={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: '12px', marginBottom: '12px', overflow: 'hidden' }}>
+                <button onClick={() => setOpenIndex(openIndex === i ? null : i)} style={{ width: '100%', padding: '20px', background: 'transparent', border: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', color: '#fff', fontSize: '16px', fontWeight: '600', textAlign: 'left' }}>
+                  {faq.q}
+                  <span style={{ fontSize: '20px', color: '#e63946' }}>{openIndex === i ? '−' : '+'}</span>
+                </button>
+                {openIndex === i && (
+                  <div style={{ padding: '0 20px 20px', color: '#ccc', lineHeight: '1.6', fontSize: '15px' }}>
+                    {faq.a}
+                  </div>
+                )}
+              </AnimatedCard>
+            ))}
+          </div>
+        </FadeContent>
+      </div>
+    </div>
+  );
+}
+
 function LoginPage({ navigate, onAuthSuccess, addToast }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -1181,6 +1588,9 @@ export default function App() {
   else if (hash.startsWith("#/product/"))               page = <ProductDetailPage slug={hash.replace("#/product/", "")} navigate={navigate} addToast={addToast} />;
   else if (hash === "#/cart")                            page = <CartPage navigate={navigate} />;
   else if (hash === "#/checkout")                        page = <CheckoutPage navigate={navigate} />;
+  else if (hash === "#/about")                           page = <AboutPage navigate={navigate} />;
+  else if (hash === "#/contact")                         page = <ContactPage navigate={navigate} addToast={addToast} />;
+  else if (hash === "#/faq")                             page = <FAQPage navigate={navigate} />;
   else if (hash === "#/login")                           page = <LoginForm />;
   else if (hash === "#/register")                        page = <RegisterForm />;
   else if (hash === "#/dashboard")                       page = <UserDashboard />;

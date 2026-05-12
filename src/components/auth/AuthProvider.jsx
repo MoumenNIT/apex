@@ -62,7 +62,11 @@ export const AuthProvider = ({ children }) => {
         last_name: metadata.last_name || '',
         is_admin: metadata.is_admin || false,
       };
-      await supabase.from('users').upsert(profilePayload);
+      const { error: upsertError } = await supabase.from('users').upsert(profilePayload);
+      if (upsertError) {
+        console.error('Failed to create user profile:', upsertError);
+        throw new Error(`Failed to create user profile: ${upsertError.message}`);
+      }
     }
     return data;
   };
