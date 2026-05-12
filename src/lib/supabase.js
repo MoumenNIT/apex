@@ -248,6 +248,41 @@ export const db = {
     return { data, error };
   },
 
+  // ===== IMAGE UPLOAD =====
+  async uploadProductImage(file, productId) {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${productId}-${Date.now()}.${fileExt}`;
+      const filePath = `products/${fileName}`;
+
+      const { data, error } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file);
+
+      if (error) throw error;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+
+      return { data: { url: publicUrl, path: filePath }, error: null };
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      return { data: null, error };
+    }
+  },
+
+  async deleteProductImage(imagePath) {
+    if (!imagePath) return { error: null };
+    
+    const { error } = await supabase.storage
+      .from('product-images')
+      .remove([imagePath]);
+    
+    return { error };
+  },
+
   async getAllProducts() {
     const { data, error } = await supabase
       .from('products')

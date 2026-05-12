@@ -22,6 +22,7 @@ export default function AdminDashboard() {
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [formData, setFormData] = useState({});
+  const [imageFile, setImageFile] = useState(null);
   const [toast, setToast] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [dateRange, setDateRange] = useState('7d');
@@ -217,13 +218,31 @@ export default function AdminDashboard() {
     }
 
     try {
+      let imageUrl = formData.image_url;
+
+      // Upload image if a new file is selected
+      if (imageFile) {
+        showToast('⏳ Uploading image...');
+        const tempId = editingProduct?.id || crypto.randomUUID();
+        const { data: uploadData, error: uploadError } = await db.uploadProductImage(imageFile, tempId);
+        
+        if (uploadError) {
+          throw new Error(`Image upload failed: ${uploadError.message}`);
+        }
+        
+        imageUrl = uploadData.url;
+        showToast('✅ Image uploaded successfully');
+      }
+
+      const productData = { ...formData, image_url: imageUrl };
+
       if (editingProduct) {
-        const { error } = await db.updateProduct(editingProduct.id, formData);
+        const { error } = await db.updateProduct(editingProduct.id, productData);
         if (error) throw error;
         await logAdminAction('PRODUCT_UPDATE', { product_id: editingProduct.id, name: formData.name });
         showToast('✅ Product updated successfully');
       } else {
-        const { data, error } = await db.createProduct(formData);
+        const { data, error } = await db.createProduct(productData);
         if (error) throw error;
         await logAdminAction('PRODUCT_CREATE', { product_id: data?.id, name: formData.name });
         showToast('✅ Product created successfully');
@@ -232,6 +251,7 @@ export default function AdminDashboard() {
       setShowProductForm(false);
       setEditingProduct(null);
       setFormData({});
+      setImageFile(null);
       loadDashboard();
     } catch (err) {
       showToast(`❌ ${err.message}`);
@@ -245,21 +265,15 @@ export default function AdminDashboard() {
       specs: product.product_specs || [],
       highlights: product.product_highlights || [],
     });
+    setImageFile(null);
     setShowProductForm(true);
   };
 
-  const deleteProduct = async (id) => {
-    if (!confirm('Are you sure? This cannot be undone.')) return;
-
-    try {
-      const { error } = await db.deleteProduct(id);
-      if (error) throw error;
-      await logAdminAction('PRODUCT_DELETE', { product_id: id });
-      showToast('✅ Product deleted');
-      loadDashboard();
-    } catch (err) {
-      showToast(`❌ ${err.message}`);
-    }
+  const closeProductForm = () => {
+    setShowProductForm(false);
+    setEditingProduct(null);
+    setFormData({});
+    setImageFile(null);
   };
 
   const quickUpdateStock = async (productId, newStock) => {
@@ -659,6 +673,7 @@ export default function AdminDashboard() {
                     onChange={(e) => {
                       const file = e.target.files[0];
                       if (file) {
+                        setImageFile(file);
                         const reader = new FileReader();
                         reader.onloadend = () => {
                           setFormData({ ...formData, image_url: reader.result });
