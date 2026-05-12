@@ -252,8 +252,9 @@ const CSS = `
   .btn-block { width: 100%; justify-content: center; }
 
   /* Hero */
-  .hero { position: relative; padding: 100px 0 80px; overflow: hidden; border-bottom: 1px solid var(--border); }
-  .hero::before { content: ''; position: absolute; top: -40%; right: -10%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(230,57,70,.08) 0%, transparent 65%); pointer-events: none; }
+  .hero { position: relative; padding: 120px 0 100px; overflow: hidden; background: linear-gradient(135deg, rgba(230,57,70,0.05) 0%, rgba(45,31,61,0.1) 100%); border-bottom: 1px solid var(--border); }
+  .hero::before { content: ''; position: absolute; top: -40%; right: -10%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(230,57,70,.15) 0%, transparent 65%); pointer-events: none; animation: pulse 8s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.1); opacity: 0.8; } }
   .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
   .hero-eyebrow { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 20px; }
   .hero-title { font-family: var(--font-display); font-size: clamp(56px, 8vw, 96px); line-height: .95; letter-spacing: 2px; margin-bottom: 24px; }
@@ -264,7 +265,7 @@ const CSS = `
   .hero-stat-num { font-family: var(--font-display); font-size: 40px; line-height: 1; }
   .hero-stat-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
   .hero-visual { display: flex; align-items: center; justify-content: center; }
-  .hero-gfx { width: 100%; max-width: 480px; background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 40px; position: relative; overflow: hidden; text-align: center; }
+  .hero-gfx { width: 100%; max-width: 480px; background: linear-gradient(135deg, rgba(230,57,70,0.1) 0%, rgba(45,31,61,0.15) 100%); border: 2px solid rgba(230,57,70,0.3); border-radius: 20px; padding: 40px; position: relative; overflow: hidden; text-align: center; box-shadow: 0 20px 60px rgba(230,57,70,0.1), inset 0 1px 0 rgba(255,255,255,0.1); }
   .hero-gfx::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 60% 30%, rgba(230,57,70,.15) 0%, transparent 65%); pointer-events: none; }
   .hero-pc-art { font-size: 120px; display: block; filter: drop-shadow(0 0 40px rgba(230,57,70,.3)); animation: float 4s ease-in-out infinite; }
   .hero-pc-label { font-family: var(--font-display); font-size: 22px; letter-spacing: 3px; color: var(--accent); margin-top: 8px; }
@@ -274,6 +275,8 @@ const CSS = `
 
   /* Sections */
   .section { padding: 80px 0; }
+  .section:nth-child(odd) { background: linear-gradient(180deg, rgba(10,10,15,0) 0%, rgba(230,57,70,0.02) 100%); }
+  .section:nth-child(even) { background: linear-gradient(180deg, rgba(230,57,70,0.02) 0%, rgba(10,10,15,0) 100%); }
   .section-header { margin-bottom: 48px; }
   .section-eyebrow { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
   .section-title { font-family: var(--font-display); font-size: clamp(36px, 5vw, 56px); letter-spacing: 1.5px; }
@@ -672,15 +675,16 @@ function HomePage({ navigate, addToast }) {
             </div>
             <div className="props-grid">
               {[
-                { icon: "⚙️", title: "Hand-Assembled", text: "Every system is built by expert technicians with 10+ years experience. No rushing, no shortcuts." },
-                { icon: "✓", title: "72-Hour Testing", text: "Every PC undergoes intensive stress testing before shipping. We guarantee stability and performance." },
-                { icon: "⭐", title: "Premium Support", text: "Real engineers available 24/7. Not a support ticket system, direct access to the team." },
-                { icon: "♻️", title: "Lifetime Upgrades", text: "Bring your Apex back anytime for free component consultations and upgrades at cost." },
+                { icon: "⚙️", title: "Hand-Assembled", text: "Every system is built by expert technicians with 10+ years experience. No rushing, no shortcuts.", color: "#e63946", bgColor: "rgba(230,57,70,0.1)" },
+                { icon: "✓", title: "72-Hour Testing", text: "Every PC undergoes intensive stress testing before shipping. We guarantee stability and performance.", color: "#ffd60a", bgColor: "rgba(255,214,10,0.1)" },
+                { icon: "⭐", title: "Premium Support", text: "Real engineers available 24/7. Not a support ticket system, direct access to the team.", color: "#7c3aed", bgColor: "rgba(124,58,237,0.1)" },
+                { icon: "♻️", title: "Lifetime Upgrades", text: "Bring your Apex back anytime for free component consultations and upgrades at cost.", color: "#06b6d4", bgColor: "rgba(6,182,212,0.1)" },
               ].map(p => (
-                <AnimatedCard key={p.title} hoverScale={1.02} style={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: '12px', padding: '30px' }}>
-                  <div style={{ fontSize: '36px', marginBottom: '16px', display: 'block' }}>{p.icon}</div>
-                  <div className="prop-title">{p.title}</div>
-                  <p className="prop-text">{p.text}</p>
+                <AnimatedCard key={p.title} hoverScale={1.05} style={{ background: p.bgColor, border: `2px solid ${p.color}40`, borderRadius: '16px', padding: '32px', position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ position: 'absolute', top: 0, right: 0, width: '120px', height: '120px', background: `radial-gradient(circle, ${p.color}20 0%, transparent 70%)`, borderRadius: '50%', transform: 'translate(30%, -30%)' }} />
+                  <div style={{ fontSize: '48px', marginBottom: '16px', display: 'block', position: 'relative', zIndex: 1 }}>{p.icon}</div>
+                  <div className="prop-title" style={{ color: p.color, marginBottom: '12px' }}>{p.title}</div>
+                  <p className="prop-text" style={{ color: '#aaa' }}>{p.text}</p>
                 </AnimatedCard>
               ))}
             </div>
@@ -688,7 +692,7 @@ function HomePage({ navigate, addToast }) {
         </div>
       </section>
 
-      <section className="section" style={{ background: '#0f0f1a' }}>
+      <section className="section" style={{ background: 'linear-gradient(180deg, rgba(230,57,70,0.03) 0%, rgba(10,10,15,0) 100%)' }}>
         <div className="container">
           <FadeContent>
             <div className="section-header">
@@ -699,42 +703,51 @@ function HomePage({ navigate, addToast }) {
           </FadeContent>
           <FadeContent delay={200}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
-              {tiersByCategory.map((tier, idx) => (
-                <AnimatedCard 
-                  key={tier.category} 
-                  hoverScale={1.02}
-                  style={{ 
-                    background: '#1a1a2e', 
-                    border: '1px solid #333', 
-                    borderRadius: '12px', 
-                    padding: '24px',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onClick={() => navigate("#/products")}
-                >
-                  <div style={{ fontSize: '24px', fontWeight: '700', color: '#e63946', marginBottom: '12px' }}>
-                    {tier.category}
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '12px' }}>
-                    <div>
-                      <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>Starting at</div>
-                      <div style={{ fontSize: '24px', fontWeight: '700', color: '#fff' }}>
-                        $<CountUp end={tier.minPrice} />
+              {tiersByCategory.map((tier, idx) => {
+                const colors = ['#e63946', '#ffd60a', '#7c3aed', '#06b6d4'];
+                const bgColors = ['rgba(230,57,70,0.1)', 'rgba(255,214,10,0.1)', 'rgba(124,58,237,0.1)', 'rgba(6,182,212,0.1)'];
+                const color = colors[idx % colors.length];
+                const bgColor = bgColors[idx % bgColors.length];
+                return (
+                  <AnimatedCard 
+                    key={tier.category} 
+                    hoverScale={1.08}
+                    style={{ 
+                      background: bgColor,
+                      border: `2px solid ${color}40`,
+                      borderRadius: '16px', 
+                      padding: '28px',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                    onClick={() => navigate("#/products")}
+                  >
+                    <div style={{ position: 'absolute', top: -20, right: -20, width: '100px', height: '100px', background: `radial-gradient(circle, ${color}30 0%, transparent 70%)`, borderRadius: '50%' }} />
+                    <div style={{ fontSize: '28px', fontWeight: '700', color: color, marginBottom: '12px', position: 'relative', zIndex: 1 }}>
+                      {tier.category}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '12px', position: 'relative', zIndex: 1 }}>
+                      <div>
+                        <div style={{ fontSize: '11px', color: '#888', marginBottom: '4px', fontWeight: '600' }}>STARTING AT</div>
+                        <div style={{ fontSize: '26px', fontWeight: '700', color: color }}>
+                          $<CountUp end={tier.minPrice} />
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '11px', color: '#888', marginBottom: '4px', fontWeight: '600' }}>UP TO</div>
+                        <div style={{ fontSize: '18px', fontWeight: '600', color: '#ccc' }}>
+                          $<CountUp end={tier.maxPrice} />
+                        </div>
                       </div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>Up to</div>
-                      <div style={{ fontSize: '18px', fontWeight: '600', color: '#ccc' }}>
-                        $<CountUp end={tier.maxPrice} />
-                      </div>
+                    <div style={{ fontSize: '13px', color: '#999', paddingTop: '12px', borderTop: `1px solid ${color}40`, position: 'relative', zIndex: 1 }}>
+                      {tier.count} available system{tier.count !== 1 ? 's' : ''}
                     </div>
-                  </div>
-                  <div style={{ fontSize: '13px', color: '#666', paddingTop: '12px', borderTop: '1px solid #333' }}>
-                    {tier.count} available system{tier.count !== 1 ? 's' : ''}
-                  </div>
-                </AnimatedCard>
-              ))}
+                  </AnimatedCard>
+                );
+              })}
             </div>
           </FadeContent>
         </div>
@@ -757,7 +770,7 @@ function HomePage({ navigate, addToast }) {
         </div>
       </section>
 
-      <section className="section" style={{ background: '#0f0f1a' }}>
+      <section className="section" style={{ background: 'linear-gradient(180deg, rgba(10,10,15,0) 0%, rgba(230,57,70,0.03) 100%)' }}>
         <div className="container">
           <FadeContent>
             <div className="section-header">
@@ -769,37 +782,41 @@ function HomePage({ navigate, addToast }) {
           <FadeContent delay={200}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px', marginBottom: '40px' }}>
               {[
-                { label: "Systems Shipped", value: 50000 },
-                { label: "Happy Customers", value: 48000 },
-                { label: "Avg Rating", value: 4.9, suffix: '/5' },
-                { label: "Years in Business", value: 5 },
+                { label: "Systems Shipped", value: 50000, color: "#e63946" },
+                { label: "Happy Customers", value: 48000, color: "#ffd60a" },
+                { label: "Avg Rating", value: 4.9, suffix: '/5', color: "#7c3aed" },
+                { label: "Years in Business", value: 5, color: "#06b6d4" },
               ].map((stat, i) => (
-                <AnimatedCard key={stat.label} hoverScale={1.02} style={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: '12px', padding: '30px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '48px', fontWeight: '700', color: '#e63946', marginBottom: '8px' }}>
+                <AnimatedCard key={stat.label} hoverScale={1.08} style={{ background: `linear-gradient(135deg, ${stat.color}15 0%, ${stat.color}05 100%)`, border: `2px solid ${stat.color}40`, borderRadius: '16px', padding: '32px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ position: 'absolute', top: -15, left: '50%', transform: 'translateX(-50%)', width: '80px', height: '80px', background: `radial-gradient(circle, ${stat.color}30 0%, transparent 70%)`, borderRadius: '50%' }} />
+                  <div style={{ fontSize: '56px', fontWeight: '700', color: stat.color, marginBottom: '8px', position: 'relative', zIndex: 1 }}>
                     <CountUp end={stat.value} />{stat.suffix || ''}
                   </div>
-                  <div style={{ fontSize: '14px', color: '#ccc' }}>{stat.label}</div>
+                  <div style={{ fontSize: '15px', color: '#ccc', fontWeight: '500', position: 'relative', zIndex: 1 }}>{stat.label}</div>
                 </AnimatedCard>
               ))}
             </div>
           </FadeContent>
           <FadeContent delay={400}>
-            <AnimatedCard hoverScale={1.01} style={{ background: 'linear-gradient(135deg, rgba(230,57,70,0.1) 0%, rgba(45,31,61,0.1) 100%)', border: '1px solid #333', borderRadius: '16px', padding: '40px', textAlign: 'center' }}>
-              <h3 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '12px', color: '#fff' }}>Industry Recognition</h3>
-              <p style={{ fontSize: '15px', color: '#ccc', marginBottom: '20px' }}>Featured in leading tech publications for innovation and customer satisfaction.</p>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap', fontSize: '12px', color: '#666' }}>
-                {['TechReview', 'PCGamer', 'GamersNexus', 'LTT'].map(pub => (
-                  <span key={pub} style={{ background: '#0f0f1a', padding: '8px 16px', borderRadius: '6px', border: '1px solid #333' }}>
-                    {pub}
-                  </span>
-                ))}
+            <AnimatedCard hoverScale={1.02} style={{ background: 'linear-gradient(135deg, rgba(230,57,70,0.15) 0%, rgba(124,58,237,0.1) 100%)', border: '2px solid rgba(230,57,70,0.3)', borderRadius: '20px', padding: '48px', textAlign: 'center' }}>
+              <h3 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '12px', color: '#fff' }}>Industry Recognition</h3>
+              <p style={{ fontSize: '16px', color: '#ccc', marginBottom: '28px' }}>Featured in leading tech publications for innovation and customer satisfaction.</p>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap', fontSize: '13px', fontWeight: '600' }}>
+                {['TechReview', 'PCGamer', 'GamersNexus', 'LTT'].map((pub, i) => {
+                  const colors = ['#e63946', '#ffd60a', '#7c3aed', '#06b6d4'];
+                  return (
+                    <span key={pub} style={{ background: `${colors[i]}15`, color: colors[i], padding: '10px 18px', borderRadius: '8px', border: `1.5px solid ${colors[i]}40` }}>
+                      {pub}
+                    </span>
+                  );
+                })}
               </div>
             </AnimatedCard>
           </FadeContent>
         </div>
       </section>
 
-      <section className="section" style={{ background: '#0f0f1a' }}>
+      <section className="section" style={{ background: 'linear-gradient(180deg, rgba(10,10,15,0) 0%, rgba(230,57,70,0.02) 100%)' }}>
         <div className="container">
           <FadeContent>
             <div className="section-header">
@@ -811,18 +828,19 @@ function HomePage({ navigate, addToast }) {
           <FadeContent delay={200}>
             <div className="testimonials-grid">
               {[
-                { name: "Alex Chen", role: "Professional Gamer", text: "The Apex Predator X is absolutely insane. 4K at 165fps with zero throttling. Best investment I've ever made for my streaming setup." },
-                { name: "Sarah Mitchell", role: "Video Editor", text: "Rendering times dropped by 60%. The build quality is exceptional, and their support team helped me optimize my workflow perfectly." },
-                { name: "James Rodriguez", role: "Software Developer", text: "Finally a company that understands what developers need. Fast, reliable, and the upgrade path is seamless. Highly recommended." },
+                { name: "Alex Chen", role: "Professional Gamer", text: "The Apex Predator X is absolutely insane. 4K at 165fps with zero throttling. Best investment I've ever made for my streaming setup.", color: "#e63946" },
+                { name: "Sarah Mitchell", role: "Video Editor", text: "Rendering times dropped by 60%. The build quality is exceptional, and their support team helped me optimize my workflow perfectly.", color: "#ffd60a" },
+                { name: "James Rodriguez", role: "Software Developer", text: "Finally a company that understands what developers need. Fast, reliable, and the upgrade path is seamless. Highly recommended.", color: "#7c3aed" },
               ].map((t, i) => (
-                <AnimatedCard key={i} hoverScale={1.02} style={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: '12px', padding: '30px' }}>
-                  <div style={{ fontSize: '24px', marginBottom: '16px', color: '#e63946' }}>"</div>
-                  <p style={{ fontSize: '15px', lineHeight: '1.6', color: '#ccc', marginBottom: '20px' }}>{t.text}</p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 'bold', color: '#fff' }}>{t.name.charAt(0)}</div>
+                <AnimatedCard key={i} hoverScale={1.05} style={{ background: `linear-gradient(135deg, ${t.color}15 0%, ${t.color}05 100%)`, border: `2px solid ${t.color}40`, borderRadius: '16px', padding: '32px', position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ position: 'absolute', top: -20, right: -20, width: '100px', height: '100px', background: `radial-gradient(circle, ${t.color}20 0%, transparent 70%)`, borderRadius: '50%' }} />
+                  <div style={{ fontSize: '36px', marginBottom: '16px', color: t.color, position: 'relative', zIndex: 1 }}>"</div>
+                  <p style={{ fontSize: '15px', lineHeight: '1.7', color: '#ccc', marginBottom: '24px', position: 'relative', zIndex: 1 }}>{t.text}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative', zIndex: 1 }}>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: `linear-gradient(135deg, ${t.color}30 0%, ${t.color}10 100%)`, border: `2px solid ${t.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 'bold', color: t.color }}>{t.name.charAt(0)}</div>
                     <div>
                       <div style={{ fontSize: '16px', fontWeight: '600', color: '#fff' }}>{t.name}</div>
-                      <div style={{ fontSize: '13px', color: '#666' }}>{t.role}</div>
+                      <div style={{ fontSize: '13px', color: '#888' }}>{t.role}</div>
                     </div>
                   </div>
                 </AnimatedCard>
@@ -832,7 +850,7 @@ function HomePage({ navigate, addToast }) {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section" style={{ background: 'linear-gradient(180deg, rgba(230,57,70,0.03) 0%, rgba(10,10,15,0) 100%)' }}>
         <div className="container">
           <FadeContent>
             <div className="section-header">
@@ -842,19 +860,20 @@ function HomePage({ navigate, addToast }) {
             </div>
           </FadeContent>
           <FadeContent delay={200}>
-            <AnimatedCard hoverScale={1.02} style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #2d1f3d 100%)', border: '1px solid #333', borderRadius: '16px', padding: '50px', textAlign: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '24px' }}>
-                <div style={{ fontSize: '48px' }}>⚙️</div>
-                <div>
-                  <h3 style={{ fontSize: '28px', fontWeight: '700', color: '#fff' }}>Full Customization</h3>
+            <AnimatedCard hoverScale={1.04} style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.15) 0%, rgba(6,182,212,0.1) 100%)', border: '2px solid rgba(124,58,237,0.3)', borderRadius: '20px', padding: '60px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: -100, right: -100, width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(124,58,237,0.2) 0%, transparent 70%)', borderRadius: '50%' }} />
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '24px' }}>
+                  <div style={{ fontSize: '56px' }}>⚙️</div>
+                  <h3 style={{ fontSize: '32px', fontWeight: '700', color: '#fff' }}>Full Customization</h3>
                 </div>
-              </div>
-              <p style={{ fontSize: '16px', color: '#ccc', marginBottom: '28px', maxWidth: '600px', margin: '0 auto 28px' }}>
-                Choose your CPU, GPU, RAM, storage, cooling, and more. Our experts will help ensure compatibility and optimize for your workload.
-              </p>
-              <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                <ShinyButton onClick={() => navigate("#/contact")}>Request Custom Build</ShinyButton>
-                <ShinyButton style={{ background: 'transparent', border: '1px solid #333' }} onClick={() => navigate("#/faq")}>See FAQ</ShinyButton>
+                <p style={{ fontSize: '17px', color: '#ddd', marginBottom: '32px', maxWidth: '600px', margin: '0 auto 32px' }}>
+                  Choose your CPU, GPU, RAM, storage, cooling, and more. Our experts will help ensure compatibility and optimize for your workload.
+                </p>
+                <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <ShinyButton style={{ padding: '14px 32px' }} onClick={() => navigate("#/contact")}>Request Custom Build</ShinyButton>
+                  <ShinyButton style={{ padding: '14px 32px', background: 'rgba(255,255,255,0.1)', border: '2px solid rgba(124,58,237,0.3)', color: '#fff' }} onClick={() => navigate("#/faq")}>See FAQ</ShinyButton>
+                </div>
               </div>
             </AnimatedCard>
           </FadeContent>
@@ -871,26 +890,33 @@ function HomePage({ navigate, addToast }) {
             </div>
           </FadeContent>
           <FadeContent delay={200}>
-            <AnimatedCard style={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: '12px', padding: '40px', maxWidth: '600px', margin: '0 auto' }}>
-              <div style={{ display: 'flex', gap: '12px', flexDirection: 'column' }}>
-                <input type="email" placeholder="Enter your email" style={{ padding: '14px', borderRadius: '8px', border: '1px solid #333', background: '#0f0f1a', color: '#fff', fontSize: '15px' }} />
-                <ShinyButton style={{ padding: '14px' }}>Subscribe to Newsletter</ShinyButton>
+            <AnimatedCard hoverScale={1.02} style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.15) 0%, rgba(230,57,70,0.1) 100%)', border: '2px solid rgba(6,182,212,0.3)', borderRadius: '16px', padding: '48px', maxWidth: '600px', margin: '0 auto', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: -50, right: -50, width: '200px', height: '200px', background: 'radial-gradient(circle, rgba(6,182,212,0.2) 0%, transparent 70%)', borderRadius: '50%' }} />
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <div style={{ display: 'flex', gap: '12px', flexDirection: 'column' }}>
+                  <input type="email" placeholder="Enter your email" style={{ padding: '14px', borderRadius: '10px', border: '2px solid rgba(6,182,212,0.2)', background: 'rgba(10,10,15,0.5)', color: '#fff', fontSize: '15px', fontWeight: '500' }} />
+                  <ShinyButton style={{ padding: '14px', background: '#06b6d4', color: '#0a0a0f', fontWeight: '700' }}>Subscribe to Newsletter</ShinyButton>
+                </div>
+                <p style={{ fontSize: '12px', color: '#999', marginTop: '16px', textAlign: 'center' }}>No spam, unsubscribe anytime. We respect your privacy.</p>
               </div>
-              <p style={{ fontSize: '12px', color: '#666', marginTop: '16px', textAlign: 'center' }}>No spam, unsubscribe anytime. We respect your privacy.</p>
             </AnimatedCard>
           </FadeContent>
         </div>
       </section>
 
-      <section className="section" style={{ background: '#0f0f1a' }}>
+      <section className="section" style={{ background: 'linear-gradient(180deg, rgba(230,57,70,0.03) 0%, rgba(10,10,15,0) 100%)' }}>
         <div className="container">
           <FadeContent>
-            <AnimatedCard hoverScale={1.02} style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #2d1f3d 100%)', border: '1px solid #333', borderRadius: '16px', padding: '60px', textAlign: 'center' }}>
-              <h2 style={{ fontSize: '36px', fontWeight: '700', marginBottom: '16px', color: '#fff' }}>Ready to Build Your Legend?</h2>
-              <p style={{ fontSize: '18px', color: '#ccc', marginBottom: '32px', maxWidth: '600px', margin: '0 auto 32px' }}>Join thousands of professionals, gamers, and creators who trust Apex for their performance computing needs.</p>
-              <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                <ShinyButton onClick={() => navigate("#/products")}>Shop Now</ShinyButton>
-                <ShinyButton style={{ background: 'transparent', border: '1px solid #333' }} onClick={() => navigate("#/contact")}>Contact Sales</ShinyButton>
+            <AnimatedCard hoverScale={1.03} style={{ background: 'linear-gradient(135deg, #e63946 0%, #2d1f3d 100%)', border: 'none', borderRadius: '24px', padding: '80px', textAlign: 'center', position: 'relative', overflow: 'hidden', boxShadow: '0 40px 120px rgba(230,57,70,0.2)' }}>
+              <div style={{ position: 'absolute', top: -100, right: -100, width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)', borderRadius: '50%' }} />
+              <div style={{ position: 'absolute', bottom: -50, left: -50, width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%)', borderRadius: '50%' }} />
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <h2 style={{ fontSize: '48px', fontWeight: '700', marginBottom: '20px', color: '#fff' }}>Ready to Build Your Legend?</h2>
+                <p style={{ fontSize: '20px', color: 'rgba(255,255,255,0.95)', marginBottom: '40px', maxWidth: '700px', margin: '0 auto 40px' }}>Join thousands of professionals, gamers, and creators who trust Apex for their performance computing needs.</p>
+                <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <ShinyButton style={{ padding: '16px 40px', fontSize: '16px', background: '#fff', color: '#e63946', fontWeight: '700' }} onClick={() => navigate("#/products")}>Shop Now</ShinyButton>
+                  <ShinyButton style={{ padding: '16px 40px', fontSize: '16px', background: 'rgba(255,255,255,0.1)', border: '2px solid rgba(255,255,255,0.3)', color: '#fff' }} onClick={() => navigate("#/contact")}>Contact Sales</ShinyButton>
+                </div>
               </div>
             </AnimatedCard>
           </FadeContent>
