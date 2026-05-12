@@ -15,40 +15,61 @@ export const AuthProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    console.log('AuthProvider: Initializing...');
     // Attempt to restore session from localStorage
     checkUser();
     
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event, session?.user?.id);
+      console.log('AuthProvider: Auth state change event:', event);
+      console.log('AuthProvider: Session user:', session?.user?.id);
+      
       if (session?.user) {
-        console.log('Setting user and ensuring profile exists...');
+        console.log('AuthProvider: User authenticated, setting user and ensuring profile...');
         setUser(session.user);
         // Ensure profile exists first before checking admin role
         await ensureUserProfile(session.user);
-        console.log('Profile ensured, now checking admin role...');
+        console.log('AuthProvider: Profile ensured, now checking admin role...');
         await checkAdminRole(session.user.id);
-        console.log('Admin role check complete');
+        console.log('AuthProvider: Admin role check complete');
       } else {
-        console.log('No session, clearing user');
+        console.log('AuthProvider: No session, clearing user');
         setUser(null);
         setIsAdmin(false);
       }
       setLoading(false);
-      console.log('Loading set to false');
+      console.log('AuthProvider: Loading set to false');
     });
 
-    return () => authListener.subscription.unsubscribe();
+    return () => {
+      console.log('AuthProvider: Cleaning up auth listener');
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   const checkUser = async () => {
-    const { data: { user: currentUser } } = await supabase.auth.getUser();
-    if (currentUser) {
-      setUser(currentUser);
-      // Ensure profile exists before checking admin role
-      await ensureUserProfile(currentUser);
-      await checkAdminRole(currentUser.id);
+    console.log('AuthProvider: Checking for existing session...');
+    try {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      
+      if (currentUser) {
+        console.log('AuthProvider: Session found for user:', currentUser.id);
+        setUser(currentUser);
+        // Ensure profile exists before checking admin role
+        await ensureUserProfile(currentUser);
+        await checkAdminRole(currentUser.id);
+        console.log('AuthProvider: Session restored successfully');
+      } else {
+        console.log('AuthProvider: No existing session found');
+        setUser(null);
+        setIsAdmin(false);
+      }
+    } catch (err) {
+      console.error('AuthProvider: Error checking user session:', err);
+      setUser(null);
+      setIsAdmin(false);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const checkAdminRole = async (userId) => {

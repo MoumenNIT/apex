@@ -14,6 +14,8 @@ const supabaseClient = createClient(supabaseUrl || '', supabaseAnonKey || '', {
     persistSession: true,
     storage: window.localStorage,
     storageKey: 'apex-store-auth',
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
   },
 });
 
