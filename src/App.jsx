@@ -595,8 +595,8 @@ function ProductCard({ product: p, navigate, addToast }) {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid #333' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'baseline' }}>
-                <span style={{ fontSize: '26px', fontWeight: '700', color: '#fff' }}>$<CountUp end={p.price} /></span>
-                {p.originalPrice && <span style={{ fontSize: '18px', color: '#666', textDecoration: 'line-through', marginLeft: '8px' }}>${p.originalPrice.toLocaleString()}</span>}
+                <span style={{ fontSize: '26px', fontWeight: '700', color: '#fff' }}><CountUp end={p.price} /> DZD</span>
+                {p.originalPrice && <span style={{ fontSize: '18px', color: '#666', textDecoration: 'line-through', marginLeft: '8px' }}>{p.originalPrice.toLocaleString()} DZD</span>}
               </div>
             </div>
             <div className="product-rating">
@@ -760,13 +760,13 @@ function HomePage({ navigate, addToast }) {
                       <div>
                         <div style={{ fontSize: '11px', color: '#888', marginBottom: '4px', fontWeight: '600' }}>STARTING AT</div>
                         <div style={{ fontSize: '26px', fontWeight: '700', color: color }}>
-                          $<CountUp end={tier.minPrice} />
+                          <CountUp end={tier.minPrice} /> DZD
                         </div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
                         <div style={{ fontSize: '11px', color: '#888', marginBottom: '4px', fontWeight: '600' }}>UP TO</div>
                         <div style={{ fontSize: '18px', fontWeight: '600', color: '#ccc' }}>
-                          $<CountUp end={tier.maxPrice} />
+                          <CountUp end={tier.maxPrice} /> DZD
                         </div>
                       </div>
                     </div>
@@ -1098,10 +1098,10 @@ function ProductDetailPage({ slug, navigate, addToast }) {
                 <span style={{ color: "var(--muted)", fontSize: 14 }}>({product.reviews} reviews)</span>
               </div>
               <div className="detail-price-row">
-                <span className="detail-price">$<CountUp end={product.price} /></span>
+                <span className="detail-price"><CountUp end={product.price} /> DZD</span>
                 {product.originalPrice && <>
-                  <span className="detail-orig">${product.originalPrice.toLocaleString()}</span>
-                  <span className="detail-savings">Save ${savings.toLocaleString()}</span>
+                  <span className="detail-orig">{product.originalPrice.toLocaleString()} DZD</span>
+                  <span className="detail-savings">Save {savings.toLocaleString()} DZD</span>
                 </>}
               </div>
               <hr className="divider" style={{ margin: "24px 0" }} />
@@ -1128,7 +1128,7 @@ function ProductDetailPage({ slug, navigate, addToast }) {
                   <button className="qty-btn" onClick={() => setQty(q => q + 1)}>+</button>
                 </div>
                 <ShinyButton style={{ flex: 1 }} onClick={handleAdd}>
-                  Add to Cart — ${(product.price * qty).toLocaleString()}
+                  Add to Cart — {(product.price * qty).toLocaleString()} DZD
                 </ShinyButton>
               </div>
               <ShinyButton style={{ marginTop: 12, background: 'transparent', border: '1px solid #333' }} onClick={() => { handleAdd(); navigate("#/cart"); }}>
@@ -1188,8 +1188,8 @@ function CartPage({ navigate }) {
                       <button className="qty-btn" onClick={() => dispatch({ type: "SET_QTY", id: item.id, qty: item.qty + 1 })}>+</button>
                     </div>
                     <div style={{ textAlign: "right" }}>
-                      <div className="cart-item-price">$<CountUp end={item.price * item.qty} /></div>
-                      <div style={{ fontSize: 13, color: "#666" }}>${item.price.toLocaleString()} each</div>
+                      <div className="cart-item-price"><CountUp end={item.price * item.qty} /> DZD</div>
+                      <div style={{ fontSize: 13, color: "#666" }}>{item.price.toLocaleString()} DZD each</div>
                       <button className="btn btn-ghost btn-sm" style={{ color: "#e63946", marginTop: 8 }} onClick={() => dispatch({ type: "REMOVE", id: item.id })}>Remove</button>
                     </div>
                   </div>
@@ -1201,11 +1201,11 @@ function CartPage({ navigate }) {
           <FadeContent delay={400}>
             <AnimatedCard style={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: '12px', padding: '30px' }}>
               <div className="summary-title">ORDER SUMMARY</div>
-              <div className="summary-row"><span>Subtotal ({items.reduce((s, i) => s + i.qty, 0)} items)</span><span>$<CountUp end={total} /></span></div>
-              <div className="summary-row"><span>Shipping</span><span>{shipping === 0 ? <span style={{ color: "#27ae60" }}>FREE</span> : `$${shipping}`}</span></div>
-              <div className="summary-row"><span>Tax (8%)</span><span>$<CountUp end={tax} /></span></div>
-              {total < 2000 && <div style={{ fontSize: 12, color: "#666", margin: "8px 0" }}>Spend ${(2000 - total).toLocaleString()} more for free shipping!</div>}
-              <div className="summary-row total"><span>Total</span><span>$<CountUp end={total + shipping + tax} /></span></div>
+              <div className="summary-row"><span>Subtotal ({items.reduce((s, i) => s + i.qty, 0)} items)</span><span><CountUp end={total} /> DZD</span></div>
+              <div className="summary-row"><span>Shipping</span><span>{shipping === 0 ? <span style={{ color: "#27ae60" }}>FREE</span> : `${shipping} DZD`}</span></div>
+              <div className="summary-row"><span>Tax (8%)</span><span><CountUp end={tax} /> DZD</span></div>
+              {total < 2000 && <div style={{ fontSize: 12, color: "#666", margin: "8px 0" }}>Spend {(2000 - total).toLocaleString()} DZD more for free shipping!</div>}
+              <div className="summary-row total"><span>Total</span><span><CountUp end={total + shipping + tax} /> DZD</span></div>
               <ShinyButton style={{ marginTop: 20, width: '100%' }} onClick={() => navigate("#/checkout")}>Proceed to Checkout →</ShinyButton>
               <div style={{ textAlign: "center", marginTop: 16, fontSize: 12, color: "#666" }}>Secure checkout · SSL encrypted</div>
             </AnimatedCard>
@@ -1326,7 +1326,7 @@ function CheckoutPage({ navigate }) {
                 </div>
                 <div style={{ display:"flex", gap:12, marginTop:24 }}>
                   <ShinyButton style={{ background: 'transparent', border: '1px solid #333' }} onClick={() => setStep(1)}>← Back</ShinyButton>
-                  <ShinyButton style={{ flex:1 }} onClick={() => setStep(3)}>Place Order — ${grandTotal.toLocaleString()}</ShinyButton>
+                  <ShinyButton style={{ flex:1 }} onClick={() => setStep(3)}>Place Order — {grandTotal.toLocaleString()} DZD</ShinyButton>
                 </div>
                 </AnimatedCard>
               )}
@@ -1341,14 +1341,14 @@ function CheckoutPage({ navigate }) {
                     <div style={{ fontSize:14, fontWeight:600, color: '#fff' }}>{item.name}</div>
                     <div style={{ fontSize:12, color:"#666" }}>Qty: {item.qty}</div>
                   </div>
-                  <div style={{ fontSize:14, fontWeight:600, color: '#fff' }}>$<CountUp end={item.price * item.qty} /></div>
+                  <div style={{ fontSize:14, fontWeight:600, color: '#fff' }}><CountUp end={item.price * item.qty} /> DZD</div>
                 </div>
             ))}
             <hr className="divider" style={{ margin:"16px 0" }} />
-            <div className="summary-row"><span>Subtotal</span><span>$<CountUp end={total} /></span></div>
-            <div className="summary-row"><span>Shipping</span><span>{shipping === 0 ? "FREE" : `$${shipping}`}</span></div>
-            <div className="summary-row"><span>Tax</span><span>$<CountUp end={tax} /></span></div>
-            <div className="summary-row total"><span>Total</span><span>$<CountUp end={grandTotal} /></span></div>
+            <div className="summary-row"><span>Subtotal</span><span><CountUp end={total} /> DZD</span></div>
+            <div className="summary-row"><span>Shipping</span><span>{shipping === 0 ? "FREE" : `${shipping} DZD`}</span></div>
+            <div className="summary-row"><span>Tax</span><span><CountUp end={tax} /> DZD</span></div>
+            <div className="summary-row total"><span>Total</span><span><CountUp end={grandTotal} /> DZD</span></div>
             </AnimatedCard>
           </FadeContent>
         </div>

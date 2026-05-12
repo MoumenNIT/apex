@@ -78,13 +78,14 @@ export const AuthProvider = ({ children }) => {
         const client = supabaseAdmin || supabase;
         const { error: insertError } = await client.from('users').upsert(profilePayload);
         if (insertError) {
-          console.warn('Failed to create missing user profile:', insertError);
+          console.error('Failed to create missing user profile:', insertError);
+          console.error('Profile payload:', profilePayload);
         } else {
           console.log('Created missing user profile successfully');
         }
       }
     } catch (err) {
-      console.warn('Unexpected error ensuring user profile:', err);
+      console.error('Unexpected error ensuring user profile:', err);
     }
   };
 
@@ -96,21 +97,26 @@ export const AuthProvider = ({ children }) => {
         password,
         options: {
           data: metadata,
+          emailRedirectTo: window.location.origin,
         },
       });
 
       if (error && error.message !== 'User already registered') {
+        console.error('Sign up error:', error);
         throw error;
       }
 
       let userId;
-      if (data?.user) {
-        userId = data.user.id;
-      } else {
+      let authUser = data?.user;
+
+      if (!authUser) {
         const { data: { user: existingUser } } = await supabase.auth.getUser();
         if (existingUser) {
           userId = existingUser.id;
+          authUser = existingUser;
         }
+      } else {
+        userId = authUser.id;
       }
 
       if (userId) {
@@ -121,14 +127,35 @@ export const AuthProvider = ({ children }) => {
           last_name: metadata.last_name || '',
           is_admin: metadata.is_admin || false,
         };
+
+        console.log('Attempting to upsert user profile:', profilePayload);
         const client = supabaseAdmin || supabase;
-        await client.from('users').upsert(profilePayload);
+        const { error: upsertError } = await client.from('users').upsert(profilePayload);
+
+        if (upsertError) {
+          console.error('Failed to upsert user profile:', upsertError);
+          throw new Error(`Failed to create user profile: ${upsertError.message}`);
+        }
+
         console.log('User profile created/updated successfully');
 
-        const { data: signInData } = await supabase.auth.signInWithPassword({
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
+
+        if (signInError) {
+          console.error('Sign in after sign up error:', signInError);
+          if (signInError.status === 422) {
+            console.log('User needs email confirmation, attempting to bypass...');
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+              return { user: session.user, session };
+            }
+          }
+          throw signInError;
+        }
+
         return signInData;
       }
 
@@ -149,6 +176,14 @@ export const AuthProvider = ({ children }) => {
 
       if (error) {
         console.error('Sign in error:', error);
+        if (error.status === 422) {
+          console.log('422 error - likely email confirmation required');
+          throw new Error('Please confirm your email address before signing in. Check your inbox for the confirmation link.');
+        }
+        if (error.message?.includes('Failed to fetch') || error.message?.includes('ERR_NAME_NOT_RESOLVED')) {
+          console.log('Network error - check internet connection and Supabase URL');
+          throw new Error('Network error. Please check your internet connection and ensure the Supabase URL is correct in your environment variables.');
+        }
         throw error;
       }
 

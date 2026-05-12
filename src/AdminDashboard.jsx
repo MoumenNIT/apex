@@ -479,7 +479,7 @@ export default function AdminDashboard() {
                   <div style={styles.statIcon}><DollarSign size={20} color="#27ae60" /></div>
                   <span style={styles.statTrend}>+8%</span>
                 </div>
-                <div style={styles.statNumber}>${(stats.totalRevenue / 100).toLocaleString()}</div>
+                <div style={styles.statNumber}>{(stats.totalRevenue / 100).toLocaleString()} DZD</div>
                 <div style={styles.statLabel}>Total Revenue</div>
               </div>
               <div style={{...styles.statCard, borderLeftColor: '#2980b9'}}>
@@ -487,7 +487,7 @@ export default function AdminDashboard() {
                   <div style={styles.statIcon}><TrendingUp size={20} color="#2980b9" /></div>
                   <span style={styles.statTrend}>Today</span>
                 </div>
-                <div style={styles.statNumber}>${(stats.todayRevenue / 100).toLocaleString()}</div>
+                <div style={styles.statNumber}>{(stats.todayRevenue / 100).toLocaleString()} DZD</div>
                 <div style={styles.statLabel}>Today's Revenue</div>
               </div>
               <div style={{...styles.statCard, borderLeftColor: '#f39c12'}}>
@@ -533,7 +533,7 @@ export default function AdminDashboard() {
                     <YAxis stroke="#666" fontSize={12} />
                     <Tooltip contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid #333' }} />
                     <Legend />
-                    <Area type="monotone" dataKey="revenue" stroke="#e63946" fillOpacity={1} fill="url(#colorRevenue)" name="Revenue ($)" />
+                    <Area type="monotone" dataKey="revenue" stroke="#e63946" fillOpacity={1} fill="url(#colorRevenue)" name="Revenue (DZD)" />
                     <Line type="monotone" dataKey="orders" stroke="#27ae60" strokeWidth={2} name="Orders" />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -566,7 +566,7 @@ export default function AdminDashboard() {
                     <div style={styles.activityContent}>
                       <div style={styles.activityTitle}>Order #{order.order_number}</div>
                       <div style={styles.activityMeta}>
-                        {order.users?.email} • ${(order.total_amount / 100).toFixed(2)}
+                        {order.users?.email} • {(order.total_amount / 100).toFixed(2)} DZD
                       </div>
                     </div>
                     <div style={{...styles.activityStatus, ...styles[`status${order.status}`]}}>
@@ -644,12 +644,35 @@ export default function AdminDashboard() {
                 <div style={styles.formGrid}>
                   <input type="text" placeholder="Product Name" value={formData.name || ''} onChange={(e) => setFormData({ ...formData, name: e.target.value })} style={styles.formInput} />
                   <input type="text" placeholder="Slug" value={formData.slug || ''} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} style={styles.formInput} />
-                  <input type="number" placeholder="Price ($)" value={formData.price || ''} onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })} style={styles.formInput} />
-                  <input type="number" placeholder="Original Price ($)" value={formData.original_price || ''} onChange={(e) => setFormData({ ...formData, original_price: parseFloat(e.target.value) })} style={styles.formInput} />
+                  <input type="number" placeholder="Price (DZD)" value={formData.price || ''} onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })} style={styles.formInput} />
+                  <input type="number" placeholder="Original Price (DZD)" value={formData.original_price || ''} onChange={(e) => setFormData({ ...formData, original_price: parseFloat(e.target.value) })} style={styles.formInput} />
                   <input type="number" placeholder="Stock Quantity" value={formData.stock_quantity || ''} onChange={(e) => setFormData({ ...formData, stock_quantity: parseInt(e.target.value) })} style={styles.formInput} />
                   <input type="text" placeholder="Category" value={formData.category || ''} onChange={(e) => setFormData({ ...formData, category: e.target.value })} style={styles.formInput} />
                   <input type="text" placeholder="Brand" value={formData.brand || ''} onChange={(e) => setFormData({ ...formData, brand: e.target.value })} style={styles.formInput} />
                   <input type="text" placeholder="Badge (optional)" value={formData.badge || ''} onChange={(e) => setFormData({ ...formData, badge: e.target.value })} style={styles.formInput} />
+                </div>
+                <div style={{ marginTop: '15px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#999' }}>Product Image</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setFormData({ ...formData, image_url: reader.result });
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    style={{ ...styles.formInput, padding: '8px' }}
+                  />
+                  {formData.image_url && (
+                    <div style={{ marginTop: '10px' }}>
+                      <img src={formData.image_url} alt="Product preview" style={{ maxWidth: '200px', maxHeight: '200px', borderRadius: '8px' }} />
+                    </div>
+                  )}
                 </div>
                 <textarea placeholder="Description" value={formData.description || ''} onChange={(e) => setFormData({ ...formData, description: e.target.value })} style={{ ...styles.formInput, minHeight: '80px', marginTop: '15px' }} />
                 <div style={styles.formRow}>
@@ -674,6 +697,7 @@ export default function AdminDashboard() {
               <table style={styles.table}>
                 <thead>
                   <tr style={styles.tableHeader}>
+                    <th style={styles.tableCell}>Image</th>
                     <th style={styles.tableCell}>Product</th>
                     <th style={styles.tableCell}>Price</th>
                     <th style={styles.tableCell}>Stock</th>
@@ -686,6 +710,15 @@ export default function AdminDashboard() {
                   {filteredProducts.map((product) => (
                     <tr key={product.id} style={styles.tableRow}>
                       <td style={styles.tableCell}>
+                        {product.image_url ? (
+                          <img src={product.image_url} alt={product.name} style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '8px' }} />
+                        ) : (
+                          <div style={{ width: '50px', height: '50px', background: '#333', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', color: '#666' }}>
+                            {product.name?.charAt(0)}
+                          </div>
+                        )}
+                      </td>
+                      <td style={styles.tableCell}>
                         <div style={styles.productCell}>
                           <div>
                             <div style={styles.productName}>{product.name}</div>
@@ -695,8 +728,8 @@ export default function AdminDashboard() {
                       </td>
                       <td style={styles.tableCell}>
                         <div style={styles.priceCell}>
-                          <span style={styles.price}>${product.price?.toLocaleString()}</span>
-                          {product.original_price && <span style={styles.originalPrice}>${product.original_price?.toLocaleString()}</span>}
+                          <span style={styles.price}>{product.price?.toLocaleString()} DZD</span>
+                          {product.original_price && <span style={styles.originalPrice}>{product.original_price?.toLocaleString()} DZD</span>}
                         </div>
                       </td>
                       <td style={styles.tableCell}>
