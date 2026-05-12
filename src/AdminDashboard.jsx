@@ -20,6 +20,7 @@ export default function AdminDashboard() {
   const [currentUser, setCurrentUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
+  const [adminCheckError, setAdminCheckError] = useState(null);
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [formData, setFormData] = useState({});
@@ -42,23 +43,47 @@ export default function AdminDashboard() {
   }, []);
 
   const checkAdminAccess = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    setIsCheckingAdmin(true);
+    setAdminCheckError(null);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setAdminCheckError('Not logged in');
+        setIsCheckingAdmin(false);
+        return;
+      }
+
+      console.log('Checking admin role for user:', user.id);
+      setCurrentUser(user);
+      
+      const { isAdmin, error } = await db.checkAdminRole(user.id);
+      
+      if (error) {
+        console.error('Error checking admin role:', error);
+        setAdminCheckError(`Admin check failed: ${error.message}`);
+        setIsAdmin(false);
+        setIsCheckingAdmin(false);
+        return;
+      }
+      
+      console.log('Admin check result:', isAdmin);
+      setIsAdmin(isAdmin);
+
+      if (!isAdmin) {
+        setAdminCheckError('Your account is not an admin');
+        setIsCheckingAdmin(false);
+        return;
+      }
+
+      console.log('Admin access granted');
       setIsCheckingAdmin(false);
-      return;
+      loadDashboard();
+    } catch (err) {
+      console.error('Admin access check failed:', err);
+      setAdminCheckError(err.message || 'Failed to check admin access');
+      setIsCheckingAdmin(false);
     }
-
-    setCurrentUser(user);
-    const { isAdmin } = await db.checkAdminRole(user.id);
-    setIsAdmin(isAdmin);
-    setIsCheckingAdmin(false);
-
-    if (!isAdmin) {
-      setToast('Admin access denied');
-      return;
-    }
-
-    loadDashboard();
   };
 
   const loadDashboard = async () => {
@@ -402,7 +427,38 @@ export default function AdminDashboard() {
       <div style={styles.adminContainer}>
         <div style={styles.restrictedBox}>
           <h2>🔒 Access Denied</h2>
-          <p>You don't have admin access. Please contact the administrator.</p>
+          <p>{adminCheckError || "You don't have admin access. Please contact the administrator."}</p>
+          {currentUser && (
+            <div style={{ 
+              marginTop: '20px',
+              padding: '15px',
+              background: 'rgba(0,0,0,0.5)',
+              borderRadius: '8px',
+              fontSize: '12px',
+              color: '#999',
+              textAlign: 'left'
+            }}>
+              <div><strong>Debug Info:</strong></div>
+              <div>User ID: {currentUser.id}</div>
+              <div>Email: {currentUser.email}</div>
+              <div>To fix: Check Supabase → users table → verify is_admin = true for this ID</div>
+            </div>
+          )}
+          <button 
+            onClick={checkAdminAccess}
+            style={{ 
+              marginTop: '20px',
+              padding: '10px 20px',
+              background: '#e63946',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: '600'
+            }}
+          >
+            Retry
+          </button>
         </div>
       </div>
     );

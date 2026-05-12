@@ -621,7 +621,7 @@ export const db = {
     
     // Add timeout to prevent hanging
     const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Admin role check timed out')), 3000)
+      setTimeout(() => reject(new Error('Admin role check timed out after 3 seconds')), 3000)
     );
 
     try {
@@ -634,15 +634,17 @@ export const db = {
       const { data: user, error } = await Promise.race([queryPromise, timeoutPromise]);
 
       if (error) {
-        console.warn('DB: Error checking admin role:', error.message);
-        // Return false for errors, don't throw - allow app to continue
+        console.error('DB: Error checking admin role:', error);
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        // Return error so caller can see what happened
         return { isAdmin: false, data: null, error };
       }
       console.log('DB: Admin role check result:', user?.is_admin);
       return { isAdmin: user?.is_admin === true, data: user, error: null };
     } catch (err) {
-      console.error('DB: Admin role check failed:', err.message);
-      // Return false on error, don't throw - allow app to continue
+      console.error('DB: Admin role check exception:', err.message);
+      // Return error so caller can see what happened
       return { isAdmin: false, data: null, error: err };
     }
   },
