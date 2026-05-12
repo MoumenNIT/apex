@@ -55,15 +55,24 @@ export default function RegisterForm() {
     if (!validate()) return;
 
     setLoading(true);
+    setErrors({});
+    
     try {
-      await signUp(formData.email, formData.password, {
+      console.log('Form submitted with email:', formData.email);
+      const result = await signUp(formData.email, formData.password, {
         first_name: formData.firstName,
         last_name: formData.lastName,
       });
-      window.location.hash = '#/login';
+      
+      console.log('Sign up successful:', result);
+      // Show success and redirect
+      setTimeout(() => {
+        window.location.hash = '#/login';
+      }, 500);
     } catch (error) {
-      setErrors({ general: error.message });
-    } finally {
+      console.error('Registration error:', error);
+      const errorMsg = error?.message || 'Registration failed. Please try again.';
+      setErrors({ general: errorMsg });
       setLoading(false);
     }
   };

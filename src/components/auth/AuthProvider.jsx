@@ -45,30 +45,67 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signUp = async (email, password, metadata) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: metadata,
-      },
-    });
-    if (error) throw error;
-
-    if (data?.user) {
-      const profilePayload = {
-        id: data.user.id,
+    try {
+      console.log('Starting sign up for:', email);
+      const { data, error } = await supabase.auth.signUp({
         email,
-        first_name: metadata.first_name || '',
-        last_name: metadata.last_name || '',
-        is_admin: metadata.is_admin || false,
-      };
-      const { error: upsertError } = await supabase.from('users').upsert(profilePayload);
-      if (upsertError) {
-        console.error('Failed to create user profile:', upsertError);
-        throw new Error(`Failed to create user profile: ${upsertError.message}`);
+        password,
+        options: {
+          data: metadata,
+        },
+      });
+
+      if (error) {
+        console.error('Auth sign up error:', error);
+        throw error;
       }
+
+      console.log('Auth sign up successful, user ID:', data?.user?.id);
+
+      if (data?.user) {
+        const profilePayload = {
+          id: data.user.id,
+          email,
+          first_name: metadata.first_name || '',
+          last_name: metadata.last_name || '',
+          is_admin: metadata.is_admin || false,
+        };
+
+        console.log('Attempting to insert user profile:', profilePayload);
+
+        try {
+          // Add timeout wrapper
+          const createProfileWithTimeout = async () => {
+            return new Promise(async (resolve, reject) => {
+              const timeoutId = setTimeout(() => {
+                reject(new Error('Database operation timed out - please try again'));
+              }, 8000);
+
+              try {
+                const { error: upsertError } = await supabase.from('users').upsert(profilePayload);
+                clearTimeout(timeoutId);
+                if (upsertError) reject(upsertError);
+                else resolve();
+              } catch (err) {
+                clearTimeout(timeoutId);
+                reject(err);
+              }
+            });
+          };
+
+          await createProfileWithTimeout();
+          console.log('User profile created successfully');
+        } catch (profileError) {
+          // Log the error but don't fail signup - user can still login and profile will be created on first load
+          console.warn('Profile creation failed but auth signup succeeded:', profileError);
+          console.log('User can still login - profile will be created on first access');
+        }
+      }
+      return data;
+    } catch (err) {
+      console.error('Sign up error:', err);
+      throw err;
     }
-    return data;
   };
 
   const signIn = async (email, password) => {
