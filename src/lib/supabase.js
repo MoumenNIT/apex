@@ -8,10 +8,17 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Missing Supabase configuration. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env');
 }
 
-export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+// Create single Supabase client instance
+const supabaseClient = createClient(supabaseUrl || '', supabaseAnonKey || '');
+
+// Export the same client instance
+export const supabase = supabaseClient;
 
 // Service role client for admin operations (bypasses RLS)
-export const supabaseAdmin = supabaseServiceKey ? createClient(supabaseUrl || '', supabaseServiceKey || '') : null;
+// Only create if service key is available and different from anon key
+export const supabaseAdmin = (supabaseServiceKey && supabaseServiceKey !== supabaseAnonKey) 
+  ? createClient(supabaseUrl || '', supabaseServiceKey || '') 
+  : null;
 
 // Helper functions for common database operations
 export const db = {
