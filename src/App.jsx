@@ -543,21 +543,29 @@ function Marquee() {
 function ProductCard({ product: p, navigate, addToast }) {
   const { dispatch } = useCart();
   function handleAdd(e) {
+    e.preventDefault();
     e.stopPropagation();
-    dispatch({ type: "ADD", product: p });
-    addToast(`${p.name} added to cart!`);
+    console.log('Adding to cart:', p.name);
+    try {
+      dispatch({ type: "ADD", product: p });
+      addToast(`${p.name} added to cart!`);
+      console.log('Item added to cart successfully');
+    } catch (err) {
+      console.error('Error adding to cart:', err);
+      addToast('Failed to add to cart');
+    }
   }
   return (
     <TiltCard>
-      <AnimatedCard 
+      <AnimatedCard
         hoverScale={1.03}
         hoverElevation={15}
         glowColor={`${p.color}30`}
-        style={{ 
-          background: '#1a1a2e', 
-          border: '1px solid #333', 
-          borderRadius: '16px', 
-          overflow: 'hidden', 
+        style={{
+          background: '#1a1a2e',
+          border: '1px solid #333',
+          borderRadius: '16px',
+          overflow: 'hidden',
           cursor: 'pointer',
           display: 'flex',
           flexDirection: 'column',
@@ -596,7 +604,27 @@ function ProductCard({ product: p, navigate, addToast }) {
               <span style={{ color: "var(--muted)" }}>({p.reviews})</span>
             </div>
           </div>
-          <ShinyButton style={{ width: '100%', padding: '10px' }} onClick={handleAdd}>+ Cart</ShinyButton>
+          <button
+            type="button"
+            onClick={handleAdd}
+            style={{
+              width: '100%',
+              padding: '12px',
+              marginTop: '16px',
+              background: '#e63946',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseOver={(e) => e.target.style.background = '#ff6b6b'}
+            onMouseOut={(e) => e.target.style.background = '#e63946'}
+          >
+            + Cart
+          </button>
         </div>
       </AnimatedCard>
     </TiltCard>
