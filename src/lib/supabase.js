@@ -525,18 +525,33 @@ export const db = {
 
   async checkAdminRole(userId) {
     console.log('DB: Checking admin role for user:', userId);
-    const { data: user, error } = await supabase
-      .from('users')
-      .select('is_admin')
-      .eq('id', userId)
-      .single();
+    
+    // Add timeout to prevent hanging
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Admin role check timed out')), 3000)
+    );
 
-    if (error) {
-      console.error('DB: Error checking admin role:', error);
-      return { isAdmin: false, data: null, error };
+    try {
+      const queryPromise = supabase
+        .from('users')
+        .select('is_admin')
+        .eq('id', userId)
+        .single();
+
+      const { data: user, error } = await Promise.race([queryPromise, timeoutPromise]);
+
+      if (error) {
+        console.warn('DB: Error checking admin role:', error.message);
+        // Return false for errors, don't throw - allow app to continue
+        return { isAdmin: false, data: null, error };
+      }
+      console.log('DB: Admin role check result:', user?.is_admin);
+      return { isAdmin: user?.is_admin === true, data: user, error: null };
+    } catch (err) {
+      console.error('DB: Admin role check failed:', err.message);
+      // Return false on error, don't throw - allow app to continue
+      return { isAdmin: false, data: null, error: err };
     }
-    console.log('DB: Admin role check result:', user?.is_admin);
-    return { isAdmin: user?.is_admin === true, data: user, error: null };
   },
 
   async signOut() {

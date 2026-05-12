@@ -19,8 +19,11 @@ export const AuthProvider = ({ children }) => {
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state change:', event, session?.user?.id);
       if (session?.user) {
-        console.log('Setting user and checking admin role...');
+        console.log('Setting user and ensuring profile exists...');
         setUser(session.user);
+        // Ensure profile exists first before checking admin role
+        await ensureUserProfile(session.user);
+        console.log('Profile ensured, now checking admin role...');
         await checkAdminRole(session.user.id);
         console.log('Admin role check complete');
       } else {
@@ -39,6 +42,8 @@ export const AuthProvider = ({ children }) => {
     const { data: { user: currentUser } } = await supabase.auth.getUser();
     if (currentUser) {
       setUser(currentUser);
+      // Ensure profile exists before checking admin role
+      await ensureUserProfile(currentUser);
       await checkAdminRole(currentUser.id);
     }
     setLoading(false);
@@ -60,7 +65,9 @@ export const AuthProvider = ({ children }) => {
     if (!user?.id) return;
 
     try {
-      const { data: existingProfile, error: existingError } = await supabase
+      // Use admin client to check if profile exists (bypass RLS)
+      const client = supabaseAdmin || supabase;
+      const { data: existingProfile, error: existingError } = await client
         .from('users')
         .select('id')
         .eq('id', user.id)
@@ -68,6 +75,7 @@ export const AuthProvider = ({ children }) => {
 
       if (existingError && existingError.code !== 'PGRST116') {
         console.warn('Error checking existing profile:', existingError);
+        return; // Don't create if we can't check
       }
 
       if (!existingProfile) {
@@ -79,15 +87,15 @@ export const AuthProvider = ({ children }) => {
           is_admin: false,
         };
 
-        console.log('Creating missing user profile on login:', profilePayload);
-        const client = supabaseAdmin || supabase;
+        console.log('Creating missing user profile:', profilePayload);
         const { error: insertError } = await client.from('users').upsert(profilePayload);
         if (insertError) {
           console.error('Failed to create missing user profile:', insertError);
-          console.error('Profile payload:', profilePayload);
         } else {
           console.log('Created missing user profile successfully');
         }
+      } else {
+        console.log('User profile already exists');
       }
     } catch (err) {
       console.error('Unexpected error ensuring user profile:', err);
