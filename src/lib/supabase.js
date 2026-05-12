@@ -517,39 +517,18 @@ export const db = {
   },
 
   async checkAdminRole(userId) {
-    let { data: user, error } = await supabase
+    console.log('DB: Checking admin role for user:', userId);
+    const { data: user, error } = await supabase
       .from('users')
       .select('is_admin')
       .eq('id', userId)
       .single();
 
-    // If user profile doesn't exist, try to create it
-    if (error && error.code === 'PGRST116') {
-      console.log('User profile not found, creating profile...');
-      const { data: authUser } = await supabase.auth.getUser();
-      if (authUser?.user) {
-        const profilePayload = {
-          id: userId,
-          email: authUser.user.email,
-          first_name: '',
-          last_name: '',
-          is_admin: false,
-        };
-
-        // Use admin client to create profile
-        const client = supabaseAdmin || supabase;
-        const { error: createError } = await client.from('users').upsert(profilePayload);
-        if (!createError) {
-          console.log('User profile created successfully');
-          user = profilePayload;
-          error = null;
-        } else {
-          console.error('Failed to create user profile:', createError);
-        }
-      }
+    if (error) {
+      console.error('DB: Error checking admin role:', error);
+      return { isAdmin: false, data: null, error };
     }
-
-    if (error) return { isAdmin: false, data: null, error };
+    console.log('DB: Admin role check result:', user?.is_admin);
     return { isAdmin: user?.is_admin === true, data: user, error: null };
   },
 

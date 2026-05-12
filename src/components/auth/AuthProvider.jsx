@@ -17,14 +17,19 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     checkUser();
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state change:', event, session?.user?.id);
       if (session?.user) {
+        console.log('Setting user and checking admin role...');
         setUser(session.user);
         await checkAdminRole(session.user.id);
+        console.log('Admin role check complete');
       } else {
+        console.log('No session, clearing user');
         setUser(null);
         setIsAdmin(false);
       }
       setLoading(false);
+      console.log('Loading set to false');
     });
 
     return () => authListener.subscription.unsubscribe();
@@ -40,8 +45,47 @@ export const AuthProvider = ({ children }) => {
   };
 
   const checkAdminRole = async (userId) => {
+    console.log('Checking admin role for user:', userId);
     const { isAdmin } = await db.checkAdminRole(userId);
+    console.log('Admin role result:', isAdmin);
     setIsAdmin(isAdmin);
+  };
+
+  const ensureUserProfile = async (user) => {
+    if (!user?.id) return;
+
+    try {
+      const { data: existingProfile, error: existingError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+
+      if (existingError && existingError.code !== 'PGRST116') {
+        console.warn('Error checking existing profile:', existingError);
+      }
+
+      if (!existingProfile) {
+        const profilePayload = {
+          id: user.id,
+          email: user.email || '',
+          first_name: user.user_metadata?.first_name || '',
+          last_name: user.user_metadata?.last_name || '',
+          is_admin: false,
+        };
+
+        console.log('Creating missing user profile on login:', profilePayload);
+        const client = supabaseAdmin || supabase;
+        const { error: insertError } = await client.from('users').upsert(profilePayload);
+        if (insertError) {
+          console.warn('Failed to create missing user profile:', insertError);
+        } else {
+          console.log('Created missing user profile successfully');
+        }
+      }
+    } catch (err) {
+      console.warn('Unexpected error ensuring user profile:', err);
+    }
   };
 
   const signUp = async (email, password, metadata) => {
@@ -60,49 +104,50 @@ export const AuthProvider = ({ children }) => {
         throw error;
       }
 
-      console.log('Auth sign up successful, user ID:', data?.user?.id);
+      if (!data?.user) {
+        console.log('Sign up completed but user is not returned, likely awaiting email confirmation.');
+        return data;
+      }
 
-      if (data?.user) {
-        const profilePayload = {
-          id: data.user.id,
-          email,
-          first_name: metadata.first_name || '',
-          last_name: metadata.last_name || '',
-          is_admin: metadata.is_admin || false,
+      console.log('Auth sign up successful, user ID:', data.user.id);
+
+      const profilePayload = {
+        id: data.user.id,
+        email,
+        first_name: metadata.first_name || '',
+        last_name: metadata.last_name || '',
+        is_admin: metadata.is_admin || false,
+      };
+
+      console.log('Attempting to insert user profile:', profilePayload);
+
+      try {
+        const createProfileWithTimeout = async () => {
+          return new Promise(async (resolve, reject) => {
+            const timeoutId = setTimeout(() => {
+              reject(new Error('Database operation timed out - please try again'));
+            }, 8000);
+
+            try {
+              const client = supabaseAdmin || supabase;
+              const { error: upsertError } = await client.from('users').upsert(profilePayload);
+              clearTimeout(timeoutId);
+              if (upsertError) reject(upsertError);
+              else resolve();
+            } catch (err) {
+              clearTimeout(timeoutId);
+              reject(err);
+            }
+          });
         };
 
-        console.log('Attempting to insert user profile:', profilePayload);
-
-        try {
-          // Add timeout wrapper
-          const createProfileWithTimeout = async () => {
-            return new Promise(async (resolve, reject) => {
-              const timeoutId = setTimeout(() => {
-                reject(new Error('Database operation timed out - please try again'));
-              }, 8000);
-
-              try {
-                // Use admin client to bypass RLS for profile creation
-                const client = supabaseAdmin || supabase;
-                const { error: upsertError } = await client.from('users').upsert(profilePayload);
-                clearTimeout(timeoutId);
-                if (upsertError) reject(upsertError);
-                else resolve();
-              } catch (err) {
-                clearTimeout(timeoutId);
-                reject(err);
-              }
-            });
-          };
-
-          await createProfileWithTimeout();
-          console.log('User profile created successfully');
-        } catch (profileError) {
-          // Log the error but don't fail signup - user can still login and profile will be created on first load
-          console.warn('Profile creation failed but auth signup succeeded:', profileError);
-          console.log('User can still login - profile will be created on first access');
-        }
+        await createProfileWithTimeout();
+        console.log('User profile created successfully');
+      } catch (profileError) {
+        console.warn('Profile creation failed but auth signup succeeded:', profileError);
+        console.log('User can still login - profile will be created on first access');
       }
+
       return data;
     } catch (err) {
       console.error('Sign up error:', err);
@@ -111,12 +156,31 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signIn = async (email, password) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) throw error;
-    return data;
+    try {
+      console.log('Starting sign in for:', email);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error('Sign in error:', error);
+        throw error;
+      }
+
+      if (!data?.user) {
+        const msg = 'Sign in completed without a valid user session. Please confirm your email and try again.';
+        console.warn(msg, data);
+        throw new Error(msg);
+      }
+
+      await ensureUserProfile(data.user);
+      console.log('Sign in successful, user:', data.user.id);
+      return data;
+    } catch (err) {
+      console.error('Sign in error:', err);
+      throw err;
+    }
   };
 
   const signOut = async () => {
