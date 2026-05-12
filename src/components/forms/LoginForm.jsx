@@ -33,12 +33,27 @@ export default function LoginForm() {
     if (!validate()) return;
 
     setLoading(true);
+    setErrors({}); // Clear previous errors
     try {
-      await signIn(formData.email, formData.password);
-      window.location.hash = '#/dashboard';
+      console.log('LoginForm: Starting sign in for:', formData.email);
+      const result = await signIn(formData.email, formData.password);
+      
+      if (result.error) {
+        console.error('LoginForm: Sign in error:', result.error);
+        const errorMsg = result.error.message || 'Failed to sign in. Please try again.';
+        setErrors({ general: errorMsg });
+        setLoading(false);
+        return;
+      }
+      
+      console.log('LoginForm: Sign in successful');
+      // Wait a moment for auth state to update, then redirect
+      setTimeout(() => {
+        window.location.hash = '#/dashboard';
+      }, 500);
     } catch (error) {
-      setErrors({ general: error.message });
-    } finally {
+      console.error('LoginForm: Exception:', error);
+      setErrors({ general: error.message || 'An unexpected error occurred' });
       setLoading(false);
     }
   };

@@ -19,6 +19,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [formData, setFormData] = useState({});
@@ -42,11 +43,15 @@ export default function AdminDashboard() {
 
   const checkAdminAccess = async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) {
+      setIsCheckingAdmin(false);
+      return;
+    }
 
     setCurrentUser(user);
     const { isAdmin } = await db.checkAdminRole(user.id);
     setIsAdmin(isAdmin);
+    setIsCheckingAdmin(false);
 
     if (!isAdmin) {
       setToast('Admin access denied');
@@ -380,6 +385,17 @@ export default function AdminDashboard() {
     logAdminAction('DATA_EXPORT', { type, record_count: data.length });
     showToast(`✅ ${type} exported successfully`);
   };
+
+  if (isCheckingAdmin) {
+    return (
+      <div style={styles.adminContainer}>
+        <div style={styles.restrictedBox}>
+          <h2>Verifying access...</h2>
+          <p>Please wait while we verify your admin permissions.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAdmin) {
     return (

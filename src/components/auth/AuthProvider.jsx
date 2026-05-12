@@ -15,7 +15,9 @@ export const AuthProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    // Attempt to restore session from localStorage
     checkUser();
+    
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state change:', event, session?.user?.id);
       if (session?.user) {
@@ -105,7 +107,13 @@ export const AuthProvider = ({ children }) => {
   const signUp = async (email, password, metadata) => {
     try {
       console.log('Starting sign up for:', email);
-      const { data, error } = await supabase.auth.signUp({
+      
+      // Add 15 second timeout for sign up
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Sign up request timed out. Please check your connection.')), 15000)
+      );
+
+      const signUpPromise = supabase.auth.signUp({
         email,
         password,
         options: {
@@ -113,6 +121,8 @@ export const AuthProvider = ({ children }) => {
           emailRedirectTo: window.location.origin,
         },
       });
+
+      const { data, error } = await Promise.race([signUpPromise, timeoutPromise]);
 
       if (error && error.message !== 'User already registered') {
         console.error('Sign up error:', error);
@@ -152,10 +162,17 @@ export const AuthProvider = ({ children }) => {
 
         console.log('User profile created/updated successfully');
 
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        // Add timeout for sign in after signup
+        const signInTimeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Sign in after sign up timed out')), 15000)
+        );
+
+        const signInPromise = supabase.auth.signInWithPassword({
           email,
           password,
         });
+
+        const { data: signInData, error: signInError } = await Promise.race([signInPromise, signInTimeoutPromise]);
 
         if (signInError) {
           console.error('Sign in after sign up error:', signInError);
@@ -182,10 +199,18 @@ export const AuthProvider = ({ children }) => {
   const signIn = async (email, password) => {
     try {
       console.log('Starting sign in for:', email);
-      const { data, error } = await supabase.auth.signInWithPassword({
+      
+      // Add 15 second timeout for sign in
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Sign in request timed out. Please check your connection and Supabase configuration.')), 15000)
+      );
+
+      const signInPromise = supabase.auth.signInWithPassword({
         email,
         password,
       });
+
+      const { data, error } = await Promise.race([signInPromise, timeoutPromise]);
 
       if (error) {
         console.error('Sign in error:', error);

@@ -8,16 +8,34 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Missing Supabase configuration. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env');
 }
 
-// Create single Supabase client instance
-const supabaseClient = createClient(supabaseUrl || '', supabaseAnonKey || '');
+// Create single Supabase client instance with localStorage persistence
+const supabaseClient = createClient(supabaseUrl || '', supabaseAnonKey || '', {
+  auth: {
+    persistSession: true,
+    storage: window.localStorage,
+    storageKey: 'apex-store-auth',
+  },
+});
 
 // Export the same client instance
 export const supabase = supabaseClient;
 
 // Service role client for admin operations (bypasses RLS)
 // Only create if service key is available and different from anon key
+// IMPORTANT: Disable all auth on admin client to avoid multiple GoTrueClient instances
 export const supabaseAdmin = (supabaseServiceKey && supabaseServiceKey !== supabaseAnonKey) 
-  ? createClient(supabaseUrl || '', supabaseServiceKey || '') 
+  ? createClient(supabaseUrl || '', supabaseServiceKey || '', {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+      global: {
+        headers: {
+          'Authorization': `Bearer ${supabaseServiceKey}`,
+        },
+      },
+    })
   : null;
 
 // Helper functions for common database operations
@@ -531,26 +549,66 @@ export const db = {
 
   // ===== AUTHENTICATION HELPERS =====
   async signIn(email, password) {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    return { data, error };
+    console.log('DB: Signing in user:', email);
+    
+    // Add 15 second timeout for sign in
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Sign in request timed out. Please check your connection.')), 15000)
+    );
+
+    try {
+      const signInPromise = supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await Promise.race([signInPromise, timeoutPromise]);
+      
+      if (error) {
+        console.error('DB: Sign in error:', error.message);
+        return { data: null, error };
+      }
+      
+      console.log('DB: Sign in successful for:', email);
+      return { data, error: null };
+    } catch (err) {
+      console.error('DB: Sign in failed:', err.message);
+      return { data: null, error: err };
+    }
   },
 
   async signUp(email, password, profile = {}) {
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) return { data: null, error };
+    console.log('DB: Signing up user:', email);
+    
+    // Add 15 second timeout for sign up
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Sign up request timed out. Please check your connection.')), 15000)
+    );
 
-    if (data?.user) {
-      const profilePayload = {
-        id: data.user.id,
-        email,
-        first_name: profile.first_name || '',
-        last_name: profile.last_name || '',
-        is_admin: profile.is_admin || false,
-      };
-      await supabase.from('users').upsert(profilePayload);
+    try {
+      const signUpPromise = supabase.auth.signUp({ email, password });
+      const { data, error } = await Promise.race([signUpPromise, timeoutPromise]);
+      
+      if (error) {
+        console.error('DB: Sign up error:', error.message);
+        return { data: null, error };
+      }
+
+      if (data?.user) {
+        const profilePayload = {
+          id: data.user.id,
+          email,
+          first_name: profile.first_name || '',
+          last_name: profile.last_name || '',
+          is_admin: profile.is_admin || false,
+        };
+        
+        console.log('DB: Creating profile for user:', data.user.id);
+        await supabase.from('users').upsert(profilePayload);
+      }
+
+      console.log('DB: Sign up successful for:', email);
+      return { data, error: null };
+    } catch (err) {
+      console.error('DB: Sign up failed:', err.message);
+      return { data: null, error: err };
     }
-
-    return { data, error };
   },
 
   async getCurrentUser() {
