@@ -2,12 +2,16 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseServiceKey = import.meta.env.VITE_SUPABASE_SERVICE_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Missing Supabase configuration. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env');
 }
 
 export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+
+// Service role client for admin operations (bypasses RLS)
+export const supabaseAdmin = supabaseServiceKey ? createClient(supabaseUrl || '', supabaseServiceKey || '') : null;
 
 // Helper functions for common database operations
 export const db = {
@@ -513,11 +517,37 @@ export const db = {
   },
 
   async checkAdminRole(userId) {
-    const { data: user, error } = await supabase
+    let { data: user, error } = await supabase
       .from('users')
       .select('is_admin')
       .eq('id', userId)
       .single();
+
+    // If user profile doesn't exist, try to create it
+    if (error && error.code === 'PGRST116') {
+      console.log('User profile not found, creating profile...');
+      const { data: authUser } = await supabase.auth.getUser();
+      if (authUser?.user) {
+        const profilePayload = {
+          id: userId,
+          email: authUser.user.email,
+          first_name: '',
+          last_name: '',
+          is_admin: false,
+        };
+
+        // Use admin client to create profile
+        const client = supabaseAdmin || supabase;
+        const { error: createError } = await client.from('users').upsert(profilePayload);
+        if (!createError) {
+          console.log('User profile created successfully');
+          user = profilePayload;
+          error = null;
+        } else {
+          console.error('Failed to create user profile:', createError);
+        }
+      }
+    }
 
     if (error) return { isAdmin: false, data: null, error };
     return { isAdmin: user?.is_admin === true, data: user, error: null };

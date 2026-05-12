@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { supabase, db } from '../../lib/supabase';
+import { supabase, supabaseAdmin, db } from '../../lib/supabase';
 
 const AuthContext = createContext(null);
 
@@ -82,7 +82,9 @@ export const AuthProvider = ({ children }) => {
               }, 8000);
 
               try {
-                const { error: upsertError } = await supabase.from('users').upsert(profilePayload);
+                // Use admin client to bypass RLS for profile creation
+                const client = supabaseAdmin || supabase;
+                const { error: upsertError } = await client.from('users').upsert(profilePayload);
                 clearTimeout(timeoutId);
                 if (upsertError) reject(upsertError);
                 else resolve();
