@@ -46,9 +46,14 @@ export const AuthProvider = ({ children }) => {
 
   const checkAdminRole = async (userId) => {
     console.log('Checking admin role for user:', userId);
-    const { isAdmin } = await db.checkAdminRole(userId);
-    console.log('Admin role result:', isAdmin);
-    setIsAdmin(isAdmin);
+    try {
+      const { isAdmin } = await db.checkAdminRole(userId);
+      console.log('Admin role result:', isAdmin);
+      setIsAdmin(isAdmin);
+    } catch (err) {
+      console.error('Error checking admin role:', err);
+      setIsAdmin(false);
+    }
   };
 
   const ensureUserProfile = async (user) => {
